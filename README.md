@@ -1,3 +1,5 @@
+![oj](http://i.imgur.com/xEi1K4l.jpg)
+
 # oj
 
 A Clojure library for executing SQL, heavily influenced by [Ring][ring].
