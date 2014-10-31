@@ -1,0 +1,62 @@
+== OJ Spec (0.1.0 Draft)
+OJ is defined in terms of generators, modifiers, and query maps, each of which
+is described below.
+
+== Generators
+OJ generators create partial SQL statements from a query map. They are
+implemented as functions that process a query map and return a string.
+
+== Modifiers
+OJ modifiers manipulate and modify query maps. They are implemented as functions
+that accept a query map, add or manipulate it in some way, and return a new
+valid query map.
+
+== Query Map
+A query map is a Clojure map containing *at least* two of the following keys and
+corresponding values:
+
+  :table
+    (Required, Keyword)
+    The name of the table that the query acts upon.
+
+---
+
+  :select
+    (Optional, Vector)
+    The collection of column names to be selected from :table. If no :select
+    is specified, the query will select all columns.
+
+  :insert
+    (Optional, IPersistentMap)
+    A Clojure map of column names corresponding to desired values to insert into
+    the :table.
+
+  :update
+    (Optional, IPersistentMap)
+    A Clojure map of column names corresponding to desired values to update from
+    a particular record in :table.
+
+  :delete
+    (Optional, Boolean)
+    If true, signifies that you wish to delete a particular record from :table.
+
+The presence of each of these four keys may also require the presence of the
+following keys:
+
+  :where
+    (IPersistentMap)
+    Required: (:update, :delete)
+    Optional: (:select)
+    A Clojure map containing column names and the corresponding values with which
+    to filter results by.
+
+  :order
+    (Vector)
+    Optional: (:select)
+    A vector of two elements. The first is the column name to order by, the
+    second is the direction with which to list the results (:desc or :asc).
+
+  :limit
+    (Integer)
+    Optional: (:select)
+    The number of results which to return from :table.
