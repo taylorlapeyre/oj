@@ -1,6 +1,8 @@
 (ns oj.generators)
 
-(defn sql-val [value]
+(defn sql-val
+  "Takes a value and represents it as it would occur in an SQL query."
+  [value]
   (cond (string? value)
         (str "\"" value "\"")
 
@@ -11,42 +13,56 @@
         (reduce str (interpose ", " (map sql-val value)))
         :else value))
 
-(defn select [{:keys [select table]}]
+(defn select
+  "Generates the SELECT part of a SQL statement from a query map."
+  [{:keys [select table]}]
   (str
     (if (empty? select)
       "SELECT *"
       (str "SELECT " (sql-val select)))
     " FROM " (sql-val table)))
 
-(defn limit [{:keys [limit]}]
+(defn limit
+  "Generates the LIMIT part of a SQL statement from a query map."
+  [{:keys [limit]}]
   (when limit
     (str "LIMIT " limit)))
 
-(defn order [{:keys [order]}]
+(defn order
+  "Generates the ORDER BY part of a SQL statement from a query map."
+  [{:keys [order]}]
   (when order
     (if (string? order)
       (str "ORDER BY " order)
       (let [[col direction] order]
         (str "ORDER BY " (sql-val col) \space (sql-val direction))))))
 
-(defn where-clause [[col value]]
+(defn where-clause
+  "Given a column name and a value, generates a valid WHERE clause."
+  [[col value]]
    (str (sql-val col)
         (if (coll? value)
           (str " IN (" (sql-val value) ")")
           (str "=" (sql-val value)))))
 
-(defn where [{:keys [where]}]
+(defn where
+  "Generates the WHERE part of a SQL statement from a query map."
+  [{:keys [where]}]
   (when where
     (str "WHERE "
          (reduce str (interpose " AND "
                                 (map where-clause where))))))
 
-(defn insert [{:keys [table insert]}]
+(defn insert
+  "Generates an INSERT SQL statement from a query map."
+  [{:keys [table insert]}]
   (str
     "INSERT INTO " (sql-val table) " (" (sql-val (keys insert))
     ") VALUES (" (sql-val (vals insert)) ")"))
 
-(defn update [{:keys [table update]}]
+(defn update
+  "Generates an UPDATE SQL statement from a query map."
+  [{:keys [table update]}]
   (let [str-keyvals (fn [[col value]]
                       (str
                         (sql-val col) "="
@@ -56,5 +72,7 @@
       "UPDATE " (sql-val table)
       " SET " (reduce str (interpose ", " (map str-keyvals update))))))
 
-(defn delete [{:keys [table]}]
+(defn delete
+  "Generates a DELETE FROM SQL statement from a query map."
+  [{:keys [table]}]
   (str "DELETE FROM " (sql-val table)))

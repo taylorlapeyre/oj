@@ -20,7 +20,9 @@
   [gen/delete
    gen/where])
 
-(defn sqlify [query]
+(defn sqlify
+  "Takes a query map and returns a valid SQL statement to be executed."
+  [query]
   (let [generators (cond (:select query)
                          sql-select-generators
                          (:insert query)
@@ -35,5 +37,8 @@
                            (for [gen generators]
                              (gen query)))))))
 
-(defn exec [query db]
+(defn exec
+  "Given a query map and a database config, executes the generated SQL
+  and returns the result."
+  [query db]
   (j/query db (sqlify query)))
