@@ -70,7 +70,27 @@ Queries are represented as a Clojure map. The full specification of a **query ma
 ; => {:id 1 :username "taylorlapeyre"}
 ```
 
-You can also perform all of the standard CRUD operations that you'd expect:
+OJ's roots in regular Clojure data structures make it extremely powerful. Let's see what this baby can do.
+``` clojure
+(defn user [& forms]
+  (let [db {:subprotocol "mysql"
+            :subname "//127.0.0.1:3306/exampledb"
+            :user "root"
+            :password ""}
+        query (reduce merge {:table :users} forms)]
+    (oj/exec query db)))
+
+(user {:where {:id 1}})
+=> SELECT * FROM users WHERE users.id=1
+
+(user {:where {:id 1}}
+      {:select [:id :username]})
+=> SELECT id, username FROM users WHERE users.id=1  LIMIT 1
+```
+
+Not quite ActiveRecord, but it's getting there. And in seven lines of code no less!
+
+Of course, you can also perform all of the standard CRUD operations that you'd expect:
 ``` clojure
 (defn create [user-data]
   (when (valid? user-data)
@@ -84,15 +104,15 @@ You can also perform all of the standard CRUD operations that you'd expect:
         (sql/where {:id id})
         (sql/update user-data)
         (oj/exec db-config))))
-  
+
   (defn delete [id]
     (-> (sql/query :users)
         (sql/where {:id id})
         (sql/delete true)
         (oj/exec db-config)))
   ```
-  
-OJ gives you a lot of flexibility. For instance, you could write some custom modifer functions and then execute them when you like. This allows you to combine them.
+
+OJ gives you a lot of flexibility. For instance, you could write some custom modifier functions and then execute them when you like. This allows you to combine them.
   ``` clojure
 (defn find-by-username
   ([query username]
@@ -119,8 +139,8 @@ OJ gives you a lot of flexibility. For instance, you could write some custom mod
 
 ## TODO
 
-- [ ] Other comparators besides `=` in `:where`
-- [ ] Aggregate functions
+- Other comparators besides `=` in `:where`
+- Aggregate functions
 
 
 ## License
