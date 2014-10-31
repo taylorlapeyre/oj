@@ -68,14 +68,10 @@ Queries are represented as a Clojure map. The full specification of a **query ma
 ; => {:id 1 :username "taylorlapeyre"}
 ```
 
-OJ's roots in regular Clojure data structures make it extremely powerful. Let's see what this baby can do.
+OJ's roots in regular Clojure data structures make it extremely powerful for building abstractions.
 ``` clojure
 (defn user [& forms]
-  (let [db {:subprotocol "mysql"
-            :subname "//127.0.0.1:3306/exampledb"
-            :user "root"
-            :password ""}
-        query (reduce merge {:table :users} forms)]
+  (let [query (reduce merge {:table :users} forms)]
     (oj/exec query db)))
 
 (user {:where {:id 1}})
@@ -86,7 +82,7 @@ OJ's roots in regular Clojure data structures make it extremely powerful. Let's 
 => SELECT id, username FROM users WHERE users.id=1  LIMIT 1
 ```
 
-Not quite ActiveRecord, but it's getting there. And in seven lines of code no less!
+Not quite ActiveRecord, but it's getting there. And in 3 lines of code no less!
 
 Of course, you can also perform all of the standard CRUD operations that you'd expect:
 ``` clojure
