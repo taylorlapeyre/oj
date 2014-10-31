@@ -81,7 +81,6 @@ After defining a database configuration, you can execute queries with `oj/exec`:
 ## TODO
 
 - [ ] Joins
-- [ ] Tests
 
 
 ## License

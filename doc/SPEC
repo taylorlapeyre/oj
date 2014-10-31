@@ -48,7 +48,7 @@ following keys:
     Required: (:update, :delete)
     Optional: (:select)
     A Clojure map containing column names and the corresponding values with which
-    to filter results by.
+    to filter results by. Values may be numbers, strings, or vectors.
 
   :order
     (Vector)
