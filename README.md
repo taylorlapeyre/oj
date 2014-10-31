@@ -2,6 +2,8 @@
 
 # oj
 
+[![Build Status](https://travis-ci.org/taylorlapeyre/oj.svg?branch=master)](https://travis-ci.org/taylorlapeyre/oj)
+
 A Clojure library for executing SQL, heavily influenced by [Ring][ring].
 
 OJ helps you interact with your database in a succinct and intuitive way by abstracting SQL queries into standard Clojure data structures. There is no magic here, only data.
