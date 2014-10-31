@@ -4,9 +4,7 @@
 
 [![Build Status](https://travis-ci.org/taylorlapeyre/oj.svg?branch=master)](https://travis-ci.org/taylorlapeyre/oj)
 
-A refreshing Clojure library for executing SQL, heavily influenced by [Ring][ring].
-
-OJ gets out of your way and lets you focus on writing good, reusable code.
+A refreshing Clojure library for talking to your database, heavily influenced by [Ring][ring]. OJ focuses on being a versatile tool for making reusable code.
 
 #### Features
 - [Standard interface](/docs/spec) for generating SQL
