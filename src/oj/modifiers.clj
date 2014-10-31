@@ -1,4 +1,5 @@
-(ns oj.modifiers)
+(ns oj.modifiers
+  (:use inflections.core))
 
 (defn query
   "Creates a skeletal query map with the given table name."
@@ -26,9 +27,15 @@
   (assoc query :select columns))
 
 (defn join
-  "Modifies the query map to include the :join clause provided"
+  "Modifies the query map to include the :join clause provided. If no join
+  columns are specified, it will make a guess:
+    (singlular :table)_id => id"
   ([q join-name on]
     (assoc-in q [:join (keyword join-name)]
       (-> (query join-name)
           (where on))))
-  ([q join-name])
+  ([q join-name]
+    (assoc-in q [:join (keyword join-name)]
+      (let [foreign-key (str (name (singular (:table q))) "_id")]
+        (-> (query join-name)
+            (where {(keyword foreign-key) :id}))))))

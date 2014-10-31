@@ -37,10 +37,9 @@
                            (for [gen generators]
                              (gen query)))))))
 
-
 (defn exec
-  "Given a query map and a database config, executes the generated SQL
-  and returns the result."
+  "Given a query map and a database config, generates and runs SQL for the query
+  and for all join tables. Returns the resuling tuples."
   [query db]
   (println (sqlify query))
 
@@ -53,7 +52,11 @@
                              :where {foreign-key key}}]
       (assoc query-result join-name (exec compiled-subquery db))))
 
-  (let [tuples (j/query db (sqlify query))]
-    (for [join (:join query)]
-      (for [tuple tuples]
-        (associate-join tuple join db)))))
+  (let [jdbc-fn (if (or (:insert query)
+                        (:update query)
+                        (:delete query)) j/execute! j/query)
+        tuples (jdbc-fn db [(sqlify query)])]
+    (if-not (:join query) tuples
+      (for [join (:join query)]
+        (for [tuple tuples]
+          (associate-join tuple join db))))))
