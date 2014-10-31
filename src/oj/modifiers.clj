@@ -10,10 +10,10 @@
   [query wheres]
   (assoc query :where wheres))
 
-(defn offset
-  "Modifies the query map to include an :offset"
+(defn limit
+  "Modifies the query map to include an :limit"
   [query n]
-  (assoc query :offset n))
+  (assoc query :limit n))
 
 (defn order
   "Modifies the query map to include the :order clause provided"
@@ -24,3 +24,11 @@
   "Modifies the query map to include the :select clause provided"
   [query columns]
   (assoc query :select columns))
+
+(defn join
+  "Modifies the query map to include the :join clause provided"
+  ([q join-name on]
+    (assoc-in q [:join (keyword join-name)]
+      (-> (query join-name)
+          (where on))))
+  ([q join-name])

@@ -45,18 +45,31 @@ following keys:
 
   :where
     (IPersistentMap)
-    Required: (:update, :delete)
-    Optional: (:select)
+    Required For: (:update, :delete)
+    Optional For: (:select)
     A Clojure map containing column names and the corresponding values with which
     to filter results by. Values may be numbers, strings, or vectors.
 
   :order
     (Vector)
-    Optional: (:select)
+    Optional For: (:select)
     A vector of two elements. The first is the column name to order by, the
     second is the direction with which to list the results (:desc or :asc).
 
   :limit
     (Integer)
-    Optional: (:select)
+    Optional For: (:select)
     The number of results which to return from :table.
+
+  :join
+    (IPersistentMap)
+    Optional For: (:select)
+    Keys are the names of tables that you wish to join, and correspond to another
+    map which relates a column of the join table with an identifying column on
+    the query map's table.
+
+    For example, this query map:
+    {:table :users :join {:items {:user_id :id}}}
+
+    When executed might return:
+    => ({:id 1 :items ({:name "thing" :user_id 1})})

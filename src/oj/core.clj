@@ -37,8 +37,23 @@
                            (for [gen generators]
                              (gen query)))))))
 
+
 (defn exec
   "Given a query map and a database config, executes the generated SQL
   and returns the result."
   [query db]
-  (j/query db (sqlify query)))
+  (println (sqlify query))
+
+  (defn associate-join [query-result join db]
+    (let [[join-name {:keys [table where select]}] join
+          [[foreign-key key]] (vec where)
+          key (if (keyword? key) (key query-result) key)
+          compiled-subquery {:table table
+                             :select select
+                             :where {foreign-key key}}]
+      (assoc query-result join-name (exec compiled-subquery db))))
+
+  (let [tuples (j/query db (sqlify query))]
+    (for [join (:join query)]
+      (for [tuple tuples]
+        (associate-join tuple join db)))))

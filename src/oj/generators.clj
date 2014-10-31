@@ -31,46 +31,48 @@
 (defn order
   "Generates the ORDER BY part of a SQL statement from a query map."
   [{:keys [order]}]
-  (when order
-    (if (string? order)
-      (str "ORDER BY " order)
-      (let [[col direction] order]
-        (str "ORDER BY " (sql-val col) \space (sql-val direction))))))
+  (when-let [[col direction] order]
+    (str "ORDER BY " (sql-val col) \space (sql-val direction))))
 
 (defn where-clause
   "Given a column name and a value, generates a valid WHERE clause."
-  [[col value]]
-   (str (sql-val col)
-        (if (coll? value)
-          (str " IN (" (sql-val value) ")")
-          (str "=" (sql-val value)))))
+  [table [col value]]
+  (let [fully-qualify #(keyword (str (name table) "." (name %)))]
+    (str (sql-val (fully-qualify col))
+         (if (coll? value)
+           (str " IN (" (sql-val value) ")")
+           (str "=" (sql-val value))))))
 
 (defn where
   "Generates the WHERE part of a SQL statement from a query map."
-  [{:keys [where]}]
+  [{:keys [table where]}]
   (when where
-    (str "WHERE "
-         (reduce str (interpose " AND "
-                                (map where-clause where))))))
+    (->> (map #(where-clause table %) where)
+         (interpose " AND ")
+         (reduce str)
+         (str "WHERE "))))
 
 (defn insert
   "Generates an INSERT SQL statement from a query map."
   [{:keys [table insert]}]
+
   (str
-    "INSERT INTO " (sql-val table) " (" (sql-val (keys insert))
-    ") VALUES (" (sql-val (vals insert)) ")"))
+    "INSERT INTO "
+    (sql-val table) " ("
+    (sql-val (keys insert))
+    ") VALUES ("
+    (sql-val (vals insert)) ")"))
 
 (defn update
   "Generates an UPDATE SQL statement from a query map."
   [{:keys [table update]}]
-  (let [str-keyvals (fn [[col value]]
-                      (str
-                        (sql-val col) "="
-                        (sql-val value)))]
-
-    (str
-      "UPDATE " (sql-val table)
-      " SET " (reduce str (interpose ", " (map str-keyvals update))))))
+    (->> (for [[col value] update]
+           (str (sql-val col) "="
+                (sql-val value)))
+         (interpose ", ")
+         (reduce str)
+         (str " SET ")
+         (str "UPDATE " (sql-val table))))
 
 (defn delete
   "Generates a DELETE FROM SQL statement from a query map."

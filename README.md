@@ -82,7 +82,6 @@ After defining a database configuration, you can execute queries with `oj/exec`:
 
 ## TODO
 
-- [ ] Joins
 - [ ] Other comparators besides `=` in `:where`
 - [ ] Aggregate functions
 
