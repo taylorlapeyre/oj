@@ -31,7 +31,7 @@ this handy dandy table):
 
 OJ provides a low-level Clojure interface over SQL. With it, you can easily create methods that perform queries to do whatever you wish.
 
-OJ tries to do one thing well: transform a Clojure map into an SQL query. With a common foundation,
+OJ tries to do one thing well: transform a Clojure map into an SQL query. With a common foundation, it's easy to create more complex libraries (for instance, something like ActiveRecord).
 
 ## Usage
 
