@@ -43,7 +43,7 @@ this handy dandy table):
 
 ## Usage
 
-Queries are represented as a Clojure map. The full specification of a query map can be found [here](/doc/spec).
+Queries are represented as a Clojure map. The full specification of a **query map** can be found [here](/doc/SPEC).
 ``` clojure
 (def users-named-taylor
   {:table :users
@@ -54,11 +54,10 @@ Queries are represented as a Clojure map. The full specification of a query map 
 ; => ({:id 1 :email "taylorlapeyre@gmail"} ...)
 ```
 
-Modifiers are functions that transform a query map into another query map. This allows us to chain them together.
+**Modifiers** are functions that transform a query map into another query map. This allows us to chain them together. Some basic modifiers are provided by default at `oj.modifiers`.
 ``` clojure
 (require [oj.core :as oj]
-         [oj.modifiers :as sql]
-         [myapp.config :refer [db-config]))
+         [oj.modifiers :as sql])
 
 (defn find-by-username [username]
   (-> (sql/query :users)
@@ -71,7 +70,7 @@ Modifiers are functions that transform a query map into another query map. This 
 ; => {:id 1 :username "taylorlapeyre"}
 ```
 
-You can also perform all of the standard CRUD operations that you'd expect.
+You can also perform all of the standard CRUD operations that you'd expect:
 ``` clojure
 (defn create [user-data]
   (when (valid? user-data)
