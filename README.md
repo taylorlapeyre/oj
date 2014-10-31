@@ -7,7 +7,7 @@
 A refreshing Clojure library for talking to your database, heavily influenced by [Ring][ring]. OJ focuses on being a versatile tool for making reusable code.
 
 #### Features
-- [Standard interface](/docs/spec) for generating SQL
+- [Standard interface](/docs/SPEC) for generating SQL
 - Concise and powerful API
 - Sensible defaults
 - Everything is *just Clojure*
