@@ -44,11 +44,19 @@ The presence of each of these four keys may also require the presence of the
 following keys:
 
   :where
-    (IPersistentMap)
+    (IPersistentMap, Quoted PersistentVector)
     Required For: (:update, :delete)
     Optional For: (:select)
-    A Clojure map containing column names and the corresponding values with which
+    If a map contains column names and the corresponding values with which
     to filter results by. Values may be numbers, strings, or vectors.
+
+    There is an alternative syntax for :where, in which you pass in a quoted
+    vector which may contain one of the following Clojure predicate functions:
+    =, <, >, not=
+
+    {:table :users
+     :where '[(> :age 3)]}
+
 
   :order
     (Vector)
@@ -68,8 +76,8 @@ following keys:
     map which relates a column of the join table with an identifying column on
     the query map's table.
 
-    For example, this query map:
-    {:table :users :join {:items {:user_id :id}}}
-
-    When executed might return:
-    => ({:id 1 :items ({:name "thing" :user_id 1})})
+    {:table :users
+     :join {:items {:user_id :id}}}
+    => SELECT id, email FROM users
+    => SELECT * FROM items WHERE items.user_id = 1
+    => SELECT * FROM items WHERE items.user_id = 2

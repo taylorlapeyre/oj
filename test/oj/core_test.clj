@@ -8,7 +8,7 @@
                   :where {:username "taylorlapeyre" :id 1}
                   :limit 1
                   :order [:id :desc]})
-         "SELECT username, id FROM users WHERE users.username=\"taylorlapeyre\" AND users.id=1 ORDER BY id desc LIMIT 1")))
+         "SELECT username, id FROM users WHERE users.username = \"taylorlapeyre\" AND users.id = 1 ORDER BY id desc LIMIT 1")))
 
 (deftest complex-select-statement
   (is (= (sqlify {:table :users
@@ -24,10 +24,15 @@
   (is (= (sqlify {:table :users
                   :update {:username "different"}
                   :where {:username "taylor"}})
-         "UPDATE users SET username=\"different\" WHERE users.username=\"taylor\"")))
+         "UPDATE users SET username = \"different\" WHERE users.username = \"taylor\"")))
 
 (deftest delete-statement
   (is (= (sqlify {:table :users
                   :delete true
                   :where {:username "taylor"}})
-         "DELETE FROM users WHERE users.username=\"taylor\"")))
+         "DELETE FROM users WHERE users.username = \"taylor\"")))
+
+(deftest alternative-where-statement
+  (is (= (sqlify {:table :users
+                  :where '[(> :age 1) (< :age 30) (= :name "Taylor") (not= :name "Jeff")]})
+          "SELECT * FROM users WHERE users.age > 1 AND users.age < 30 AND users.name = \"Taylor\" AND users.name <> \"Jeff\"")))

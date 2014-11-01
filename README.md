@@ -133,7 +133,6 @@ OJ gives you a lot of flexibility. For instance, you could write some custom mod
 
 ## TODO
 
-- Other comparators besides `=` in `:where`
 - Aggregate functions
 
 
