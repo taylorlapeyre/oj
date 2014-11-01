@@ -1,0 +1,37 @@
+header {
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.2em;
+}
+
+header h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9em;
+  color: rgb(237, 133, 38);
+  -webkit-text-stroke: 4px white;
+  text-shadow: 1px 1px #666;
+  margin: 0;
+  padding: 0;
+  -webkit-transform: rotate(-4deg);
+}
+
+pre {
+  width: 30%;
+  margin: 0 auto;
+}
+
+[data-lang] {
+  font-size: 0.8em;
+  font-family: "Menlo", monospace !important;
+}
+
+.github-link {
+  z-index: 1000;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 64px;
+  height: 64px;
+  opacity: 0.8;
+  cursor: pointer;
+}

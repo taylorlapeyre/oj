@@ -2,36 +2,23 @@
   <head>
     <title>oj</title>
     <link href='http://fonts.googleapis.com/css?family=Montserrat:700|Open+Sans:400,300' rel='stylesheet' type='text/css'>
-    <style>
-      header {
-        text-align: center;
-        font-family: 'Open Sans', sans-serif;
-        font-size: 1.2em;
-      }
-
-      header h1 {
-        font-family: 'Montserrat', sans-serif;
-        font-size: 9em;
-        color: rgb(237, 133, 38);
-        -webkit-text-stroke: 4px white;
-        text-shadow: 1px 1px #666;
-        margin: 0;
-        padding: 0;
-        -webkit-transform: rotate(-4deg);
-      }
-
-      pre {
-        width: 30%;
-        margin: 0 auto;
-      }
-    </style>
+    <link href="css/highlight.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
   </head>
   <body>
+    <img src="github.png" class="github-link">
     <header>
       <h1>oj</h1>
       <img src="http://i.imgur.com/xEi1K4l.jpg">
       <p>A refreshing Clojure library for talking to your database.</p>
     </header>
     {{ content }}
+    <script>
+      var btn = document.getElementsByClassName('github-link')[0];
+      btn.addEventListener('click', function() {
+        console.log('clicked');
+        window.location.href = "http://github.com/taylorlapeyre/oj"
+      }, false);
+    </script>
   </body>
 </html>
