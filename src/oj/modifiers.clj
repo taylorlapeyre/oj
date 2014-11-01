@@ -30,12 +30,12 @@
   "Modifies the query map to include the :join clause provided. If no join
   columns are specified, it will make a guess:
     (singlular :table)_id => id"
-  ([q join-name on]
-    (assoc-in q [:join (keyword join-name)]
-      (-> (query join-name)
+  ([q table on]
+    (assoc-in q [:join (keyword table)]
+      (-> (query table)
           (where on))))
-  ([q join-name]
-    (assoc-in q [:join (keyword join-name)]
+  ([q table]
+    (assoc-in q [:join (keyword table)]
       (let [foreign-key (str (name (singular (:table q))) "_id")]
-        (-> (query join-name)
+        (-> (query table)
             (where {(keyword foreign-key) :id}))))))

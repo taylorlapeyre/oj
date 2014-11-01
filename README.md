@@ -47,8 +47,16 @@ Queries are represented as a Clojure map. The full specification of a **query ma
   {:table :users
    :select [:id :email]
    :where {:first_name "taylor"}})
+```
 
-(oj/exec users-named-taylor db-config)
+Queries can be executed by passing a query map and a database config into `oj/exec`:
+``` clojure
+(def db {:subprotocol "mysql"
+         :subname "//127.0.0.1:3306/wishwheel3"
+         :user "root"
+         :password ""})
+
+(oj/exec users-named-taylor db)
 ; => ({:id 1 :email "taylorlapeyre@gmail"} ...)
 ```
 
