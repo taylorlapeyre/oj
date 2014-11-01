@@ -47,15 +47,16 @@ following keys:
     (IPersistentMap, Quoted PersistentVector)
     Required For: (:update, :delete)
     Optional For: (:select)
-    If a map contains column names and the corresponding values with which
-    to filter results by. Values may be numbers, strings, or vectors.
+    A Clojure map containing column names and the corresponding values with which
+    to filter the table by. Values may be numbers, strings, or vectors.
 
-    There is an alternative syntax for :where, in which you pass in a quoted
-    vector which may contain one of the following Clojure predicate functions:
+    There is also an alternative syntax for :where, in which you pass in a quoted
+    vector. The vector may contain one or more lists using the following
+    Clojure predicate functions:
     =, <, >, not=
 
     {:table :users
-     :where '[(> :age 3)]}
+     :where '[(> :age 3) (< :age 5)]}
 
 
   :order
