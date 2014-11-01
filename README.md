@@ -4,13 +4,13 @@
 
 [![Build Status](https://travis-ci.org/taylorlapeyre/oj.svg?branch=master)](https://travis-ci.org/taylorlapeyre/oj)
 
-A refreshing Clojure library for talking to your database, heavily influenced by [Ring][ring]. OJ focuses on being a versatile tool for making reusable code.
+A refreshing Clojure library for talking to your database, heavily influenced by [Ring][ring].
 
 #### Features
-- [Standard interface](/docs/SPEC) for generating SQL
+- Gives you a [standard interface](/docs/SPEC) for generating SQL
 - Concise and powerful API
 - Sensible defaults
-- Everything is *just Clojure*
+- Encourages reusable components
 
 #### Anti-features
 - Doesn't require you to write SQL
@@ -25,7 +25,7 @@ The [SPEC][spec] file provides a complete description of the OJ interface.
 Add this to your Leiningen :dependencies:
 
 ```
-[oj "0.1.2"]
+[oj "0.1.3"]
 ```
 
 You'll also need a database driver (thanks to [yesql][yesql] for providing
