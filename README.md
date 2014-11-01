@@ -79,7 +79,7 @@ OJ's roots in regular Clojure data structures make it extremely powerful for bui
 
 (user {:where {:id 1}}
       {:select [:id :username]})
-=> SELECT id, username FROM users WHERE users.id=1  LIMIT 1
+=> SELECT id, username FROM users WHERE users.id=1
 ```
 
 Not quite ActiveRecord, but it's getting there. And in 3 lines of code no less!
