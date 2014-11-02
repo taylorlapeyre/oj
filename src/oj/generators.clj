@@ -41,7 +41,6 @@
   (defn- fully-qualify
     "Sticks a table and column name together SQL style: table.col"
     [table col]
-    (println table col)
     (keyword (str (name table) "." (name col))))
 
   (defn- where=
@@ -73,15 +72,16 @@
     [table [col predicate]]
 
     (if (map? predicate)
-      (let [[[op value]] (vec predicate)]
-        (case op
-          :> (where> table col value)
-          :< (where< table col value)
-          :not= (where-not= table col value)))
+      (->> (for [[op value] predicate]
+             (case op
+               :> (where> table col value)
+               :< (where< table col value)
+               :not= (where-not= table col value)))
+            (interpose " AND ")
+            (reduce str))
       (where= table col predicate)))
 
   (when where
-
     (->> (map #(where-clause table %) where)
          (interpose " AND ")
          (reduce str)

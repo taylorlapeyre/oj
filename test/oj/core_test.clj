@@ -34,5 +34,5 @@
 
 (deftest alternative-where-statement
   (is (= (sqlify {:table :users
-                  :where '[(> :age 1) (< :age 30) (= :name "Taylor") (not= :name "Jeff")]})
-          "SELECT * FROM users WHERE users.age > 1 AND users.age < 30 AND users.name = \"Taylor\" AND users.name <> \"Jeff\"")))
+                  :where {:id {:> 2 :< 20 :not= 21}}})
+          "SELECT * FROM users WHERE users.id <> 21 AND users.id > 2 AND users.id < 20")))
