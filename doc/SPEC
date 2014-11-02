@@ -3,16 +3,15 @@ OJ is defined in terms of generators, modifiers, and query maps, each of which
 is described below.
 
 == Generators
-OJ generators create partial SQL statements from a query map. They are
+Generators create partial SQL statements from a query map. They are
 implemented as functions that process a query map and return a string.
 
 == Modifiers
-OJ modifiers manipulate and modify query maps. They are implemented as functions
-that accept a query map, add or manipulate it in some way, and return a new
-valid query map.
+Modifiers manipulate and modify query maps. They are implemented as functions
+that accept a query map, change it in some way, and return a new valid query map.
 
 == Query Map
-A query map is a Clojure map containing *at least* two of the following keys and
+A query map is a Clojure map containing *at least two* of the following keys and
 corresponding values:
 
   :table
@@ -44,20 +43,18 @@ The presence of each of these four keys may also require the presence of the
 following keys:
 
   :where
-    (IPersistentMap, Quoted PersistentVector)
+    (IPersistentMap)
     Required For: (:update, :delete)
     Optional For: (:select)
     A Clojure map containing column names and the corresponding values with which
-    to filter the table by. Values may be numbers, strings, or vectors.
+    to filter the table by. Values may be numbers, strings, vectors, or maps.
 
-    There is also an alternative syntax for :where, in which you pass in a quoted
-    vector. The vector may contain one or more lists using the following
-    Clojure predicate functions:
-    =, <, >, not=
+    If the value of an item in :where is a map, it contain only the following keys:
+    [:< :> :not=]
 
     {:table :users
-     :where '[(> :age 3) (< :age 5)]}
-
+     :where {:age {:> 21 :< 18}}}
+    SELECT * FROM users WHERE age > 21 AND age < 18
 
   :order
     (Vector)
