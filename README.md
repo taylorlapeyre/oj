@@ -62,13 +62,13 @@ Queries can be executed by passing a query map and a database config into `oj/ex
 
 **Modifiers** are functions that transform a query map into another query map. This allows us to chain them together. Some basic modifiers are provided by default at `oj.modifiers`.
 ``` clojure
-(require [oj.core :as oj]
-         [oj.modifiers :as sql])
+(require [oj.core :as oj])
+         [oj.modifiers :as db])
 
 (defn find-by-username [username]
-  (-> (sql/query :users)
-      (sql/select [:id :username :email :created_at])
-      (sql/where {:username username})
+  (-> (db/query :users)
+      (db/select [:id :username :email :created_at])
+      (db/where {:username username})
       (oj/exec db-config)
       (first)))
 
@@ -96,21 +96,21 @@ Of course, you can also perform all of the standard CRUD operations that you'd e
 ``` clojure
 (defn create [user-data]
   (when (valid? user-data)
-    (-> (sql/query :users)
-        (sql/insert user-data)
+    (-> (db/query :users)
+        (db/insert user-data)
         (oj/exec db-config))))
 
 (defn update [id user-data]
   (when (valid? user-data)
-    (-> (sql/query :users)
-        (sql/where {:id id})
-        (sql/update user-data)
+    (-> (db/query :users)
+        (db/where {:id id})
+        (db/update user-data)
         (oj/exec db-config))))
 
   (defn delete [id]
-    (-> (sql/query :users)
-        (sql/where {:id id})
-        (sql/delete true)
+    (-> (db/query :users)
+        (db/where {:id id})
+        (db/delete true)
         (oj/exec db-config)))
   ```
 
@@ -119,14 +119,14 @@ OJ gives you a lot of flexibility. For instance, you could write some custom mod
 (defn find-by-username
   ([query username]
     (-> query
-        (sql/where {:username username})))
+        (db/where {:username username})))
   ([username]
-    (-> (sql/query :users)
-        (sql/where {:username username}))))
+    (-> (db/query :users)
+        (db/where {:username username}))))
 
 ; Joins are also easily done.
 (-> (find-by-username "taylor")
-    (sql/join :items)
+    (db/join :items)
     (oj/exec db-config)
     (first))
 ; => {:username "taylor" ... :items ({:id 1 :name "A thing"})}
