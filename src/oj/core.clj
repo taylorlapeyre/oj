@@ -42,21 +42,19 @@
   and for all join tables. Returns the resuling tuples."
   [query db]
   (println (sqlify query))
-
-  (defn associate-join [query-result join db]
-    (let [[join-name {:keys [table where select]}] join
-          [[foreign-key key]] (vec where)
-          key (if (keyword? key) (key query-result) key)
-          compiled-subquery {:table table
-                             :select select
-                             :where {foreign-key key}}]
-      (assoc query-result join-name (exec compiled-subquery db))))
-
-  (let [jdbc-fn (if (or (:insert query)
-                        (:update query)
-                        (:delete query)) j/execute! j/query)
-        tuples (jdbc-fn db [(sqlify query)])]
-    (if-not (:join query) tuples
-      (for [join (:join query)]
-        (for [tuple tuples]
-          (associate-join tuple join db))))))
+  (letfn [(associate-join [query-result join db]
+            (let [[join-name {:keys [table where select]}] join
+                  [[foreign-key key]] (vec where)
+                  key (if (keyword? key) (key query-result) key)
+                  compiled-subquery {:table table
+                                     :select select
+                                     :where {foreign-key key}}]
+              (assoc query-result join-name (exec compiled-subquery db))))]
+    (let [jdbc-fn (if (or (:insert query)
+                          (:update query)
+                          (:delete query)) j/execute! j/query)
+          tuples (jdbc-fn db [(sqlify query)])]
+      (if-not (:join query) tuples
+              (for [join (:join query)]
+                (for [tuple tuples]
+                  (associate-join tuple join db)))))))
