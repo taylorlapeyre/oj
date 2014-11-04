@@ -37,55 +37,45 @@
 (defn where
   "Generates the WHERE part of a SQL statement from a query map."
   [{:keys [table where]}]
+  (letfn [(fully-qualify [table col]
+            (keyword (str (name table) "." (name col))))
 
-  (defn- fully-qualify
-    "Sticks a table and column name together SQL style: table.col"
-    [table col]
-    (keyword (str (name table) "." (name col))))
+          (where= [table col value]
+            (str (sql-val (fully-qualify table col))
+                 (if (coll? value)
+                   (str " IN (" (sql-val value) ")")
+                   (str " = " (sql-val value)))))
 
-  (defn- where=
-    [table col value]
-    (str (sql-val (fully-qualify table col))
-         (if (coll? value)
-           (str " IN (" (sql-val value) ")")
-           (str " = " (sql-val value)))))
+          (where-not= [table col value]
+            (str (sql-val (fully-qualify table col))
+                 (if (coll? value)
+                   (str " IN (" (sql-val value) ")")
+                   (str " <> " (sql-val value)))))
 
-  (defn- where-not=
-    [table col value]
-    (str (sql-val (fully-qualify table col))
-         (if (coll? value)
-           (str " NOT IN (" (sql-val value) ")")
-           (str " <> " (sql-val value)))))
+          (where> [table col value]
+            (str (sql-val (fully-qualify table col))
+                 (str " > " (sql-val value))))
 
-  (defn- where>
-    [table col value]
-    (str (sql-val (fully-qualify table col))
-         (str " > " (sql-val value))))
+          (where< [table col value]
+            (str (sql-val (fully-qualify table col))
+                 (str " < " (sql-val value))))
 
-  (defn- where<
-    [table col value]
-    (str (sql-val (fully-qualify table col))
-         (str " < " (sql-val value))))
+          (where-clause [table [col predicate]]
+            (if (map? predicate)
+              (->> (for [[op value] predicate]
+                     (case op
+                       :> (where> table col value)
+                       :< (where< table col value)
+                       :not= (where-not= table col value)))
+                    (interpose " AND ")
+                    (reduce str))
+              (where= table col predicate)))]
 
-  (defn- where-clause
-    "Given a column name and a value, generates a valid WHERE clause."
-    [table [col predicate]]
-
-    (if (map? predicate)
-      (->> (for [[op value] predicate]
-             (case op
-               :> (where> table col value)
-               :< (where< table col value)
-               :not= (where-not= table col value)))
-            (interpose " AND ")
-            (reduce str))
-      (where= table col predicate)))
-
-  (when where
-    (->> (map #(where-clause table %) where)
-         (interpose " AND ")
-         (reduce str)
-         (str "WHERE "))))
+    (when where
+      (->> (map #(where-clause table %) where)
+           (interpose " AND ")
+           (reduce str)
+           (str "WHERE ")))))
 
 (defn insert
   "Generates an INSERT SQL statement from a query map."
