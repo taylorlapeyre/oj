@@ -7,7 +7,7 @@
 A refreshing Clojure library for talking to your database, heavily influenced by [Ring][ring].
 
 #### Features
-- Gives you a [standard interface](/docs/SPEC) for generating SQL
+- Gives you a [standard interface](https://github.com/taylorlapeyre/oj/blob/master/doc/SPEC) for generating SQL
 - Concise and powerful API
 - Sensible defaults
 - Encourages reusable components
