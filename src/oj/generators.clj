@@ -4,7 +4,7 @@
   "Takes a value and represents it as it would occur in an SQL query."
   [value]
   (cond (string? value)
-        (str "\"" value "\"")
+        (str "'" value "'")
 
         (keyword? value)
         (name value)

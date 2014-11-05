@@ -8,7 +8,7 @@
                   :where {:username "taylorlapeyre" :id 1}
                   :limit 1
                   :order [:id :desc]})
-         "SELECT username, id FROM users WHERE users.username = \"taylorlapeyre\" AND users.id = 1 ORDER BY id desc LIMIT 1")))
+         "SELECT username, id FROM users WHERE users.username = 'taylorlapeyre' AND users.id = 1 ORDER BY id desc LIMIT 1")))
 
 (deftest complex-select-statement
   (is (= (sqlify {:table :users
@@ -18,19 +18,19 @@
 (deftest insert-statement
   (is (= (sqlify {:table :users
                   :insert {:username "taylor" :password "password"}})
-         "INSERT INTO users (password, username) VALUES (\"password\", \"taylor\")")))
+         "INSERT INTO users (password, username) VALUES ('password', 'taylor')")))
 
 (deftest update-statement
   (is (= (sqlify {:table :users
                   :update {:username "different"}
                   :where {:username "taylor"}})
-         "UPDATE users SET username = \"different\" WHERE users.username = \"taylor\"")))
+         "UPDATE users SET username = 'different' WHERE users.username = 'taylor'")))
 
 (deftest delete-statement
   (is (= (sqlify {:table :users
                   :delete true
                   :where {:username "taylor"}})
-         "DELETE FROM users WHERE users.username = \"taylor\"")))
+         "DELETE FROM users WHERE users.username = 'taylor'")))
 
 (deftest alternative-where-statement
   (is (= (sqlify {:table :users
