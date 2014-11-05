@@ -37,42 +37,42 @@
 (defn where
   "Generates the WHERE part of a SQL statement from a query map."
   [{:keys [table where]}]
-  (letfn [(fully-qualify [table col]
+  (letfn [(fully-qualify [col]
             (keyword (str (name table) "." (name col))))
 
-          (where= [table col value]
-            (str (sql-val (fully-qualify table col))
+          (where= [col value]
+            (str (sql-val (full y-qualify col))
                  (if (coll? value)
                    (str " IN (" (sql-val value) ")")
                    (str " = " (sql-val value)))))
 
-          (where-not= [table col value]
-            (str (sql-val (fully-qualify table col))
+          (where-not= [col value]
+            (str (sql-val (fully-qualify col))
                  (if (coll? value)
                    (str " IN (" (sql-val value) ")")
                    (str " <> " (sql-val value)))))
 
-          (where> [table col value]
-            (str (sql-val (fully-qualify table col))
+          (where> [col value]
+            (str (sql-val (fully-qualify col))
                  (str " > " (sql-val value))))
 
-          (where< [table col value]
-            (str (sql-val (fully-qualify table col))
+          (where< [col value]
+            (str (sql-val (fully-qualify col))
                  (str " < " (sql-val value))))
 
-          (where-clause [table [col predicate]]
+          (where-clause [[col predicate]]
             (if (map? predicate)
               (->> (for [[op value] predicate]
                      (case op
-                       :> (where> table col value)
-                       :< (where< table col value)
-                       :not= (where-not= table col value)))
+                       :> (where> col value)
+                       :< (where< col value)
+                       :not= (where-not= col value)))
                     (interpose " AND ")
                     (reduce str))
-              (where= table col predicate)))]
+              (where= col predicate)))]
 
     (when where
-      (->> (map #(where-clause table %) where)
+      (->> (map where-clause where)
            (interpose " AND ")
            (reduce str)
            (str "WHERE ")))))
