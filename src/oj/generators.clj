@@ -41,7 +41,7 @@
             (keyword (str (name table) "." (name col))))
 
           (where= [col value]
-            (str (sql-val (full y-qualify col))
+            (str (sql-val (fully-qualify col))
                  (if (coll? value)
                    (str " IN (" (sql-val value) ")")
                    (str " = " (sql-val value)))))
