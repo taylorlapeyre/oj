@@ -1,39 +1,88 @@
 (ns oj.validation)
 
-(defn validate-query-map
-  [candidate]
+(defn problem [message]
+  (let [message (str "The query map had a problem: " message)]
+    (throw (Exception. message))))
 
-  (defn- validate-where []
-    (let [where (:where candidate)
-          valid-comparator? #(contains? '[= not= < >] %)]
-      (when-not where
-        (throw (Exception. "[:update, :delete] must contain key: [:where]")))
-      (when (map? where)
-        (when-not (empty? (filter #(or (vector? %) (list? %)) (vals where)))
-          (throw (Exception. "Values for :where must not be vectors or lists."))))))
+(defn validate-query-map [{:keys [table select insert where update delete join]}]
+  "Analyzes a query map and throws an error when it finds malformed data."
+  ; letfn is really ugly...
+  (letfn [(validate-select []
+            (when-not (vector? select)
+              (problem ":select must be a vector."))
+            (when-not (every? keyword? select)
+              (problem "The elements of :select must be keywords."))
+            true)
 
-  (when-not (:table candidate)
-    (throw (Exception. "Must contain key: [:table]")))
+          (validate-insert []
+            (when-not (map? insert)
+              (problem ":insert must be a map."))
+            (when-not (every? keyword? (keys insert))
+              (problem "The keys to an :insert must be keywords."))
+            (let [valid-type? #(or (string? %) (number? %))]
+              (when-not (every? valid-type? (vals insert))
+                (problem "Every value to an :insert map must be either a string or a number.")))
+            true)
 
-  (let [n (count (select-keys candidate [:insert :update :delete]))]
-    (when (> n 1)
-      (throw (Exception. "Cannot contain more than one of the following keys: [:insert :update :delete]"))))
+          (validate-where []
+            (when-not (map? where)
+              (problem ":where must be a map."))
+            (when-not (every? keyword? (keys where))
+              (problem "The keys to a :where must be keywords."))
+            (let [valid-type? #(or (string? %) (number? %))
+                  valid-comparator? #(contains? '[= not= < >] %)]
+              (for [value (vals where)]
+                (if (map? value)
+                  (do
+                    (when-not (every? valid-comparator? (keys value))
+                      (problem "Invalid comparator in :where. Valid keys are [:> :< :not=]"))
+                    (when-not (every? valid-type? (vals value))
+                      (problem "Every value in a comparator clause must be either a string or a number.")))
+                  (when-not (valid-type? value)
+                    (problem "Every value in a :where map must be either a string, number, or map.")))))
+            true)
 
-  (when-let [insert (:insert candidate)]
-    (when-not (map? insert)
-      (throw (Exception. "The corresponding value to :insert must be a map.")))
-    (when-not (empty? (filter map? (vals insert)))
-      (throw (Exception. "Values for :insert must not be maps.")))
-    (when-not (empty? (filter coll? (keys insert)))
-      (throw (Exception. "Keys for :insert must not be collections."))))
+          (validate-update []
+            (when-not (map? update)
+              (problem ":update must be a map."))
+            (when-not (every? keyword? (keys update))
+              (problem "The keys to an :update must be keywords."))
+            (let [valid-type? #(or (string? %) (number? %))]
+              (when-not (every? valid-type? (vals update))
+                (problem "Every value to an :update map must be either a string or a number.")))
+            (when-not where
+              (problem ":update requires the presence of a :where key."))
+            true)
 
-  (when-let [update (:update candidate)]
-    (when-not (map? update)
-      (throw (Exception. "The corresponding value to :update must be a map.")))
-    (when-not (empty? (filter map? (vals update)))
-      (throw (Exception. "Values for :update must not be maps.")))
-    (when-not (empty? (filter coll? (keys update)))
-      (throw (Exception. "Keys for :update must not be collections.")))
-    (validate-where))
+          (validate-delete []
+            (when-not (= delete true)
+              (problem ":delete must have the value 'true' to be valid"))
+            (when-not where
+              (problem ":delete requires the presence of a :where key."))
+            true)
 
-  true)
+          (validate-join []
+            (when-not (map? join)
+              (problem ":join must be a map."))
+            (when-not (every? keyword? (keys join))
+              (problem "The keys to a :join must be keywords."))
+            (when-not (every? map? (vals join))
+              (problem "The values in a :join map must be a map of foreign key pairs."))
+            (when-not (every? #(= (count %) 1) (vals join))
+              (problem "Foreign map pairs in a :join must have only one key/value."))
+            (for [foreign-key-map (vals join)]
+              (when-not (and (every? keyword? (vals foreign-key-map))
+                             (every? keyword? (keys foreign-key-map)))
+                (problem "Both keys and values to foreign key pairs in a :join must be keywords.")))
+            true)]
+    (when-not (keyword? table)
+      (problem ":table is required."))
+
+    (when select (validate-select))
+    (when insert (validate-insert))
+    (when update (validate-update))
+    (when where (validate-where))
+    (when delete (validate-delete))
+    (when join (validate-join))
+
+    true))
