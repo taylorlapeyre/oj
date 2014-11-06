@@ -8,8 +8,9 @@ A refreshing Clojure library for talking to your database, heavily influenced by
 
 #### Features
 - Gives you a [standard interface](https://github.com/taylorlapeyre/oj/blob/master/doc/SPEC) for generating SQL
-- Concise and powerful API
+- Enforces type checking and validation for queries
 - Sensible defaults
+- Concise and powerful API
 - Encourages reusable components
 
 #### Anti-features
