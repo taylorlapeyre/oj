@@ -1,4 +1,4 @@
-(defproject oj "0.1.5"
+(defproject oj "0.1.6"
   :description "SQL implemented in Clojure"
   :url "http://github.com/taylorlapeyre/oj"
   :license {:name "Eclipse Public License"
