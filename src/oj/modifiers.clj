@@ -1,4 +1,5 @@
 (ns oj.modifiers
+  "Functions that take a query map, change it, and return a new query map."
   (:use inflections.core))
 
 (defn query

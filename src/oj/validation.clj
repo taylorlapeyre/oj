@@ -1,4 +1,5 @@
-(ns oj.validation)
+(ns oj.validation
+  "Functions for validating query maps.")
 
 (defn problem [message]
   (let [message (str "The query map had a problem: " message)]

@@ -1,5 +1,5 @@
 (defproject oj "0.1.6"
-  :description "SQL implemented in Clojure"
+  :description "A refreshing way to talk to your database."
   :url "http://github.com/taylorlapeyre/oj"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}

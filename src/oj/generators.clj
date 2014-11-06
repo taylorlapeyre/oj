@@ -1,4 +1,5 @@
-(ns oj.generators)
+(ns oj.generators
+  "Functions for generating SQL statements from a query map.")
 
 (defn sql-val
   "Takes a value and represents it as it would occur in an SQL query."
