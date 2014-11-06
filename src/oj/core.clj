@@ -2,6 +2,7 @@
   (:use oj.generators)
   (:require [clojure.java.jdbc :as j]
             [oj.generators :as gen]
+            [oj.validation :as validate]
             [clojure.string :refer [trim]]))
 
 (def sql-select-generators
@@ -24,6 +25,7 @@
 (defn sqlify
   "Takes a query map and returns a valid SQL statement to be executed."
   [query]
+  (validate/validate-query-map query)
   (let [generators (cond (:select query) sql-select-generators
                          (:insert query) sql-insert-generators
                          (:update query) sql-update-generators
