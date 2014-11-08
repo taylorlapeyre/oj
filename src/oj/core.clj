@@ -5,6 +5,8 @@
             [oj.validation :as validate]
             [clojure.string :refer [trim]]))
 
+(def connections (atom {}))
+
 (def sql-select-generators
   [gen/select
    gen/where
@@ -40,6 +42,7 @@
   and for all join tables. Returns the resuling tuples."
   [query db]
   (println (sqlify query))
+
   (letfn [(associate-join [query-result join db]
             (let [[join-name {:keys [table where select]}] join
                   [[foreign-key key]] (vec where)
@@ -48,10 +51,15 @@
                                      :select select
                                      :where {foreign-key key}}]
               (assoc query-result join-name (exec compiled-subquery db))))]
-    (let [jdbc-fn (if (or (:insert query)
+    (let [connection (if (get db @connections) (get db @connections)
+                       (let [conn (j/get-connection db)]
+                         (swap! connections assoc db conn)
+                         conn))
+          jdbc-fn (if (or (:insert query)
                           (:update query)
                           (:delete query)) j/execute! j/query)
-          tuples (jdbc-fn db [(sqlify query)])]
+          tuples (j/with-db-connection [connection db]
+                   (jdbc-fn db [(sqlify query)]))]
       (if-not (:join query) tuples
         (for [join (:join query)]
           (for [tuple tuples]

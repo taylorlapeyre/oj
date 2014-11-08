@@ -11,6 +11,8 @@
   (letfn [(validate-select []
             (when-not (vector? select)
               (problem ":select must be a vector."))
+            (when (empty? select)
+              (problem "If present, :select must contain at least one column name."))
             (when-not (every? keyword? select)
               (problem "The elements of :select must be keywords."))
             true)
