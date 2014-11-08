@@ -27,6 +27,16 @@
   [query columns]
   (assoc query :select columns))
 
+(defn insert
+  "Modifies the query map to include the :insert clause provided"
+  [query inserts]
+  (assoc query :insert inserts))
+
+(defn update
+  "Modifies the query map to include the :update clause provided"
+  [query updates]
+  (assoc query :update updates))
+
 (defn join
   "Modifies the query map to include the :join clause provided. If no join
   columns are specified, it will make a guess:
