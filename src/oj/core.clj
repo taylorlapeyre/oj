@@ -39,7 +39,7 @@
   "Given a query map and a database config, generates and runs SQL for the query
   and for all join tables. Returns the resuling tuples."
   [query db]
-  (println (str "\033[94m" (sqlify query) "\033[0m\n"))
+  (println (str "\033[95m" (sqlify query) "\033[0m"))
 
   (letfn [(associate-join [query-result join db]
             (let [[join-name {:keys [table where select]}] join
