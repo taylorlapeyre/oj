@@ -1,16 +1,9 @@
-(ns oj.logging)
+(ns oj.logging
+  (:require [environ.core :refer [env]]))
 
-(defn highlight [word]
-  (str "\033[91m" word "\033[0m"))
-
-(defn highlight-word [word]
-  (if (re-matches #"[A-Z]+" word)
-    (highlight word)
-    word))
+(defn highlight [sentence]
+  (str "\033[91m" sentence "\033[0m"))
 
 (defn pretty-log [query]
-  (let [words (clojure.string/split query #" ")]
-    (->> (map highlight-word words)
-         (interpose " ")
-         (apply str)
-         (println))))
+  (when (env :print-db-logs)
+    (println (highlight query))))

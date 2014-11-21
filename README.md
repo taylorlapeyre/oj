@@ -133,6 +133,10 @@ OJ gives you a lot of flexibility. For instance, you could write some custom mod
 ; => {:username "taylor" ... :items ({:id 1 :name "A thing"})}
 ```
 
+## Printing SQL Queries
+
+If you'd like SQL queries logged to your console when executed, you can enable it by setting the environment variable `PRINT_DB_LOGS` to true.
+
 ## Contributing
 
 1. Fork this repository
