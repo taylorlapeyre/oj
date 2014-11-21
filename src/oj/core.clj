@@ -3,6 +3,7 @@
   (:require [clojure.java.jdbc :as j]
             [oj.generators :as gen]
             [oj.validation :as validate]
+            [oj.logging :as logging]
             [clojure.string :refer [trim]]))
 
 (def sql-select-generators
@@ -30,7 +31,7 @@
                          (:insert query) sql-insert-generators
                          (:update query) sql-update-generators
                          (:delete query) sql-delete-generators
-                         :else sql-select-generators)]
+                         :else           sql-select-generators)]
     (trim (reduce str (interpose \space
                       (for [gen generators]
                         (gen query)))))))
@@ -39,7 +40,7 @@
   "Given a query map and a database config, generates and runs SQL for the query
   and for all join tables. Returns the resuling tuples."
   [query db]
-  (println (str "\033[95m" (sqlify query) "\033[0m"))
+  (logging/pretty-log (sqlify query))
 
   (letfn [(associate-join [query-result join db]
             (let [[join-name {:keys [table where select]}] join
