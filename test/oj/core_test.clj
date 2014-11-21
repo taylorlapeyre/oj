@@ -32,6 +32,11 @@
                   :where {:username "taylor"}})
          "DELETE FROM users WHERE users.username = 'taylor'")))
 
+(deftest alternative-delete-statement
+  (is (= (sqlify {:table :users
+                  :delete :all})
+         "DELETE FROM users")))
+
 (deftest alternative-where-statement
   (is (= (sqlify {:table :users
                   :where {:id {:> 2 :< 20 :not= 21}}})

@@ -37,15 +37,16 @@ corresponding values:
 
   :delete
     (Optional, Boolean)
-    If true, signifies that you wish to delete a particular record from :table.
+    If truthy, signifies that you wish to delete a particular record from :table.
+    If the value of :delete is the keyword :all, the :where key is not required.
 
 The presence of each of these four keys may also require the presence of the
 following keys:
 
   :where
     (IPersistentMap)
-    Required For: (:update, :delete)
-    Optional For: (:select)
+    Required For: (:update)
+    Optional For: (:select, :delete)
     A Clojure map containing column names and the corresponding values with which
     to filter the table by. Values may be numbers, strings, vectors, or maps.
 

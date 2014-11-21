@@ -11,6 +11,8 @@
   (letfn [(validate-select []
             (when-not (vector? select)
               (problem ":select must be a vector."))
+            (when (empty? select)
+              (problem ":select must not be empty when present."))
             (when-not (every? keyword? select)
               (problem "The elements of :select must be keywords."))
             true)
@@ -18,6 +20,8 @@
           (validate-insert []
             (when-not (map? insert)
               (problem ":insert must be a map."))
+            (when (empty? insert)
+              (problem ":insert must not be empty when present."))
             (when-not (every? keyword? (keys insert))
               (problem "The keys to an :insert must be keywords."))
             (let [valid-type? #(or (string? %) (number? %))]
@@ -28,6 +32,8 @@
           (validate-where []
             (when-not (map? where)
               (problem ":where must be a map."))
+            (when (empty? where)
+              (problem ":where must not be empty when present."))
             (when-not (every? keyword? (keys where))
               (problem "The keys to a :where must be keywords."))
             (let [valid-type? #(or (string? %) (number? %))
@@ -46,6 +52,8 @@
           (validate-update []
             (when-not (map? update)
               (problem ":update must be a map."))
+            (when (empty? update)
+              (problem ":update must not be empty when present."))
             (when-not (every? keyword? (keys update))
               (problem "The keys to an :update must be keywords."))
             (let [valid-type? #(or (string? %) (number? %))]
@@ -56,10 +64,10 @@
             true)
 
           (validate-delete []
-            (when-not (= delete true)
-              (problem ":delete must have the value 'true' to be valid"))
-            (when-not where
-              (problem ":delete requires the presence of a :where key."))
+            (when-not delete
+              (problem ":delete must have a truthy value."))
+            (when (and (not= delete :all) (nil? where))
+              (problem ":delete requires the presence of a :where key when its value is not :all."))
             true)
 
           (validate-join []
