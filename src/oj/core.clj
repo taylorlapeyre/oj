@@ -42,19 +42,25 @@
   [query db]
   (logging/pretty-log (sqlify query))
 
-  (letfn [(associate-join [query-result join db]
+  (letfn [(associate-join [tuple join db]
             (let [[join-name {:keys [table where select]}] join
                   [[foreign-key key]] (vec where)
-                  key (if (keyword? key) (key query-result) key)
+                  key (if (keyword? key) (key tuple) key)
                   compiled-subquery {:table table
                                      :select select
                                      :where {foreign-key key}}]
-              (assoc query-result join-name (exec compiled-subquery db))))]
-    (let [jdbc-fn (if (or (:insert query)
-                          (:update query)
-                          (:delete query)) j/execute! j/query)
-          tuples (jdbc-fn db [(sqlify query)])]
-      (if-not (:join query) tuples
+              (assoc tuple join-name (exec compiled-subquery db))))]
+
+    (let [tuples (cond (:insert query)
+                       (j/insert! db (:table query) (:insert query))
+
+                       (#{:update :delete} query)
+                       (j/execute! db [(sqlify query)])
+
+                       :else
+                       (j/query db [(sqlify query)]))]
+      (if-not (:join query)
+        tuples
         (for [join (:join query)]
           (for [tuple tuples]
             (associate-join tuple join db)))))))
