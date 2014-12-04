@@ -37,6 +37,11 @@
   [query updates]
   (assoc query :update updates))
 
+(defn delete
+  "Modifies the query map to include the :delete clause provided"
+  [query]
+  (assoc query :delete true))
+
 (defn join
   "Modifies the query map to include the :join clause provided. If no join
   columns are specified, it will make a guess:
