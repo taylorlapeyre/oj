@@ -54,7 +54,7 @@
     (let [tuples (cond (:insert query)
                        (j/insert! db (:table query) (:insert query))
 
-                       (#{:update :delete} query)
+                       (or (:update query) (:delete query))
                        (j/execute! db [(sqlify query)])
 
                        :else
