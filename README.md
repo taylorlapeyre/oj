@@ -111,7 +111,7 @@ Of course, you can also perform all of the standard CRUD operations that you'd e
   (defn delete [id]
     (-> (db/query :users)
         (db/where {:id id})
-        (db/delete true)
+        (db/delete)
         (oj/exec db-config)))
   ```
 
