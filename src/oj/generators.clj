@@ -35,6 +35,12 @@
   (when-let [[col direction] order]
     (str "ORDER BY " (sql-val col) \space (sql-val direction))))
 
+(defn group
+  "Generates the GROUP BY part of a SQL statement from a query map."
+  [{:keys [group]}]
+  (when group
+    (str "GROUP BY " (sql-val group))))
+
 (defn where
   "Generates the WHERE part of a SQL statement from a query map."
   [{:keys [table where]}]

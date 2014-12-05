@@ -5,7 +5,7 @@
   (let [message (str "The query map had a problem: " message)]
     (throw (Exception. message))))
 
-(defn validate-query-map [{:keys [table select insert where update delete join]}]
+(defn validate-query-map [{:keys [table select insert where group update delete join]}]
   "Analyzes a query map and throws an error when it finds malformed data."
   ; letfn is really ugly...
   (letfn [(validate-select []
@@ -49,6 +49,14 @@
                     (problem "Every value in a :where map must be either a string, number, or map.")))))
             true)
 
+          (validate-group []
+            (when-not (vector? group)
+              (problem ":group must be a vector."))
+            (when (empty? group)
+              (problem ":group must not be empty when present."))
+            (when-not (every? keyword? group)
+              (problem "Every value in a :group must be a keyword")))
+
           (validate-update []
             (when-not (map? update)
               (problem ":update must be a map."))
@@ -90,6 +98,7 @@
     (when select (validate-select))
     (when insert (validate-insert))
     (when update (validate-update))
+    (when group (validate-group))
     (when where (validate-where))
     (when delete (validate-delete))
     (when join (validate-join))

@@ -9,6 +9,7 @@
 (def sql-select-generators
   [gen/select
    gen/where
+   gen/group
    gen/order
    gen/limit])
 
