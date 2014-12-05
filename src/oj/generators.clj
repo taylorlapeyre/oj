@@ -1,11 +1,29 @@
 (ns oj.generators
   "Functions for generating SQL statements from a query map.")
 
+(declare sql-val)
+
+(defn- aggregate?
+  "Returns whether a given value is an SQL aggregate form."
+  [value]
+  (and (seq? value)
+       (symbol? (first value))))
+
+(defn- sql-aggregate
+  "Transforms an SQL aggregate form into its string representation."
+  [value]
+
+  (let [[[func] params] (split-at 1 value)]
+    (str (name func) "(" (apply str (interpose ", " (map sql-val params))) ")")))
+
 (defn sql-val
   "Takes a value and represents it as it would occur in an SQL query."
   [value]
   (cond (string? value)
         (str "'" value "'")
+
+        (aggregate? value)
+        (sql-aggregate value)
 
         (keyword? value)
         (name value)
