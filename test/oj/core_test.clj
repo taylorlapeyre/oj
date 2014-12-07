@@ -34,6 +34,12 @@
                   :where {:id [1 2 3]}})
          "SELECT * FROM users WHERE users.id IN (1, 2, 3)")))
 
+(deftest select-statement-with-group-by
+  (is (= (sqlify {:table :orders
+                  :select [:order_id :price]
+                  :group [:order_id]})
+         "SELECT order_id, price FROM orders GROUP BY order_id")))
+
 (deftest insert-statement
   (is (= (sqlify {:table :users
                   :insert {:username "taylor" :password "password"}})

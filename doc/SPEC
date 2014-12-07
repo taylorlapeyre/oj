@@ -57,6 +57,11 @@ following keys:
      :where {:age {:> 21 :< 18}}}
     SELECT * FROM users WHERE age > 21 AND age < 18
 
+  :group
+    (Vector)
+    Optional For: (:select)
+    A vector of SQL column names to group the query by.
+
   :order
     (Vector)
     Optional For: (:select)
