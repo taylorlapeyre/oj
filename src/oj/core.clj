@@ -32,9 +32,12 @@
                          (:update query) sql-update-generators
                          (:delete query) sql-delete-generators
                          :else           sql-select-generators)]
-    (trim (reduce str (interpose \space
-                      (for [gen generators]
-                        (gen query)))))))
+    (->> (for [gen generators]
+           (gen query))
+         (remove nil?)
+         (interpose \space)
+         (apply str)
+         (trim))))
 
 (defn exec
   "Given a query map and a database config, generates and runs SQL for the query
