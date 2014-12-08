@@ -64,7 +64,7 @@
               (problem ":update must not be empty when present."))
             (when-not (every? keyword? (keys update))
               (problem "The keys to an :update must be keywords."))
-            (let [valid-type? #(or (string? %) (number? %) (= true &) (= false %))]
+            (let [valid-type? #(or (string? %) (number? %) (= true %) (= false %))]
               (when-not (every? valid-type? (vals update))
                 (problem "Every value to an :update map must be either a string, number, or boolean.")))
             (when-not where
