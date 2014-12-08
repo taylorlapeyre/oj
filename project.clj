@@ -1,4 +1,4 @@
-(defproject oj "0.2.1"
+(defproject oj "0.2.2"
   :description "A refreshing way to talk to your database."
   :url "http://github.com/taylorlapeyre/oj"
   :license {:name "Eclipse Public License"
