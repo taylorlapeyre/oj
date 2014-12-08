@@ -10,6 +10,9 @@
         (keyword? value)
         (name value)
 
+        (or (= true value) (= false value))
+        (if value 1 0)
+
         (coll? value)
         (reduce str (interpose ", " (map sql-val value)))
         :else value))

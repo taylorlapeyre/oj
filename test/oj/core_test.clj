@@ -14,7 +14,8 @@
 
 (defn with-test-db [f]
   (h2-fixture (fn [& args]
-                (->> (j/create-table-ddl :friends [:name "VARCHAR(100)"])
+                (->> (j/create-table-ddl :friends [:name "VARCHAR(100)"]
+                                                  [:active :int])
                      (j/db-do-commands test-db))
                 (j/insert! test-db :friends {:name "Rupert"})
                 (apply f args))))
@@ -73,8 +74,11 @@
 
 (deftest exec-insert-query
   (is (= (exec {:table :friends
-                :insert {:name "Pearl"}} test-db)
-         '(nil))))
+                :insert {:name "Pearl" :active false}} test-db)
+         '(nil)))
+  (is (= (count (exec {:table :friends
+                       :where {:active false}} test-db))
+         1)))
 
 (deftest exec-update-query
   (is (= (exec {:table :friends

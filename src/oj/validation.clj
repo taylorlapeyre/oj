@@ -24,9 +24,9 @@
               (problem ":insert must not be empty when present."))
             (when-not (every? keyword? (keys insert))
               (problem "The keys to an :insert must be keywords."))
-            (let [valid-type? #(or (string? %) (number? %))]
+            (let [valid-type? #(or (string? %) (number? %) (= true %) (= false %))]
               (when-not (every? valid-type? (vals insert))
-                (problem "Every value to an :insert map must be either a string or a number.")))
+                (problem "Every value to an :insert map must be either a string, number, or boolean.")))
             true)
 
           (validate-where []
