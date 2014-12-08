@@ -26,7 +26,7 @@ The [SPEC][spec] file provides a complete description of the OJ interface.
 Add this to your Leiningen :dependencies:
 
 ```
-[oj "0.2.2"]
+[oj "0.2.3"]
 ```
 
 You'll also need a database driver (thanks to [yesql][yesql] for providing
