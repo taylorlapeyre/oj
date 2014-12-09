@@ -13,8 +13,9 @@
               (problem ":select must be a vector."))
             (when (empty? select)
               (problem ":select must not be empty when present."))
-            (when-not (every? keyword? select)
-              (problem "The elements of :select must be keywords."))
+            (let [valid-type? #(or (keyword? %) (coll? %))]
+              (when-not (every? valid-type? select)
+                (problem "The elements of :select must be keywords or lists.")))
             true)
 
           (validate-insert []

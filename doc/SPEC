@@ -25,6 +25,10 @@ corresponding values:
     The collection of column names to be selected from :table. If no :select
     is specified, the query will select all columns.
 
+    If the column name is a list, it will be treated as an aggregate
+    function: the first member will be the function, all the rest the
+    parameters.
+
   :insert
     (Optional, IPersistentMap)
     A Clojure map of column names corresponding to desired values to insert into

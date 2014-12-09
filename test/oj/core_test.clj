@@ -41,6 +41,12 @@
                   :group [:order_id]})
          "SELECT order_id, price FROM orders GROUP BY order_id")))
 
+(deftest select-statement-with-aggregates
+  (is (= (sqlify {:table :orders
+                  :select [:order_id '(sum :price)]
+                  :group [:order_id]})
+         "SELECT order_id, sum(price) FROM orders GROUP BY order_id")))
+
 (deftest insert-statement
   (is (= (sqlify {:table :users
                   :insert {:username "taylor" :password "password"}})
