@@ -115,6 +115,14 @@
 
  (keyword (str (name table) "." (name col))))
 
+(make-filter
+ having
+ "Generates the HAVING part of a SQL statement from a query map."
+
+ (if (keyword? col)
+   (keyword (str (name table) "." (name col)))
+   col))
+
 (defn insert
   "Generates an INSERT SQL statement from a query map."
   [{:keys [table insert]}]

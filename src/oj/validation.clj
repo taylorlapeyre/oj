@@ -5,7 +5,7 @@
   (let [message (str "The query map had a problem: " message)]
     (throw (Exception. message))))
 
-(defn validate-query-map [{:keys [table select insert where group update delete join]}]
+(defn validate-query-map [{:keys [table select insert where having group update delete join]}]
   "Analyzes a query map and throws an error when it finds malformed data."
   ; letfn is really ugly...
   (letfn [(validate-select []
@@ -49,6 +49,23 @@
                   (when-not (valid-type? value)
                     (problem "Every value in a :where map must be either a string, number, or map.")))))
             true)
+
+          (validate-having []
+            (when-not (map? having)
+              (problem ":having must be a map."))
+            (when (empty? having)
+              (problem ":having must not be empty when present."))
+            (let [valid-type? #(or (string? %) (number? %))
+                  valid-comparator? #(contains? '[= not= < >] %)]
+              (for [value (vals having)]
+                (if (map? value)
+                  (do
+                    (when-not (every? valid-comparator? (keys value))
+                      (problem "Invalid comparator in :having. Valid keys are [:> :< :not=]"))
+                    (when-not (every? valid-type? (vals value))
+                      (problem "Every value in a comparator clause must be either a string or a number.")))
+                  (when-not (valid-type? value)
+                    (problem "Every value in a :having map must be either a string, number, or map."))))))
 
           (validate-group []
             (when-not (vector? group)
@@ -101,6 +118,7 @@
     (when update (validate-update))
     (when group (validate-group))
     (when where (validate-where))
+    (when having (validate-having))
     (when delete (validate-delete))
     (when join (validate-join))
 

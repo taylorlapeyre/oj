@@ -11,6 +11,7 @@
    gen/where
    gen/group
    gen/order
+   gen/having
    gen/limit])
 
 (def sql-insert-generators

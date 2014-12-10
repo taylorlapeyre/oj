@@ -61,6 +61,21 @@ following keys:
      :where {:age {:> 21 :< 18}}}
     SELECT * FROM users WHERE age > 21 AND age < 18
 
+  :having
+    (IPersistentMap)
+    Optional For: (:select)
+    A Clojure map containing column names and the corresponding values with which
+    to filter the table by, after aggregations. Values may be numbers, strings,
+    vectors or maps.
+
+    If the value of an item in :having is a map, it contain only the following keys:
+    [:< :> :not=]
+
+    {:table :orders
+     :group ['(sum :price)]
+     :having {'(sum :price) {:> 2}}}
+    SELECT * FROM orders GROUP BY sum(price) HAVING sum(price) > 2
+
   :group
     (Vector)
     Optional For: (:select)
