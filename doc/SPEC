@@ -55,7 +55,7 @@ following keys:
     to filter the table by. Values may be numbers, strings, vectors, or maps.
 
     If the value of an item in :where is a map, it contain only the following keys:
-    [:< :> :not=]
+    [:< :<= :> :>= :not=]
 
     {:table :users
      :where {:age {:> 21 :< 18}}}

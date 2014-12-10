@@ -84,16 +84,26 @@
             (str (sql-val (fully-qualify col))
                  (str " > " (sql-val value))))
 
+          (where>= [col value]
+            (str (sql-val (fully-qualify col))
+                 (str " >= " (sql-val value))))
+
           (where< [col value]
             (str (sql-val (fully-qualify col))
                  (str " < " (sql-val value))))
+
+          (where<= [col value]
+            (str (sql-val (fully-qualify col))
+                 (str " <= " (sql-val value))))
 
           (where-clause [[col predicate]]
             (if (map? predicate)
               (->> (for [[op value] predicate]
                      (case op
                        :> (where> col value)
+                       :>= (where>= col value)
                        :< (where< col value)
+                       :<= (where<= col value)
                        :not= (where-not= col value)))
                     (interpose " AND ")
                     (reduce str))

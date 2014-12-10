@@ -74,6 +74,11 @@
                   :where {:id {:> 2 :< 20 :not= 21}}})
          "SELECT * FROM users WHERE users.id <> 21 AND users.id > 2 AND users.id < 20")))
 
+(deftest equals-where-statement
+  (is (= (sqlify {:table :users
+                  :where {:id {:>= 2 :<= 20}}})
+         "SELECT * FROM users WHERE users.id <= 20 AND users.id >= 2")))
+
 (deftest exec-simple-select-query
   (is (= (map #(:name %) (exec {:table :friends} test-db))
          '("Rupert"))))
