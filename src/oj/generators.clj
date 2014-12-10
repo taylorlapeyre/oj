@@ -62,48 +62,58 @@
   (when group
     (str "GROUP BY " (sql-val group))))
 
-(defn where
-  "Generates the WHERE part of a SQL statement from a query map."
-  [{:keys [table where]}]
-  (letfn [(fully-qualify [col]
-            (keyword (str (name table) "." (name col))))
+(defmacro make-filter
+  "Generates an SQL filter (such as HAVING and WHERE) function."
+  [clause docstring & fully-qualify-body]
 
-          (where= [col value]
-            (str (sql-val (fully-qualify col))
-                 (if (coll? value)
-                   (str " IN (" (sql-val value) ")")
-                   (str " = " (sql-val value)))))
+  (let [clause-name (str (.toUpperCase (name clause)) " ")]
+    `(defn ~clause
+       ~docstring
+       [{:keys [~'table ~clause]}]
 
-          (where-not= [col value]
-            (str (sql-val (fully-qualify col))
-                 (if (coll? value)
-                   (str " IN (" (sql-val value) ")")
-                   (str " <> " (sql-val value)))))
+       (letfn [(~'fully-qualify [~'col] ~@fully-qualify-body)
+               (~'filter= [col# value#]
+                 (str (sql-val (~'fully-qualify col#))
+                      (if (coll? value#)
+                        (str " IN (" (sql-val value#) ")")
+                        (str " = " (sql-val value#)))))
 
-          (where> [col value]
-            (str (sql-val (fully-qualify col))
-                 (str " > " (sql-val value))))
+               (~'filter-not= [col# value#]
+                 (str (sql-val (~'fully-qualify col#))
+                      (if (coll? value#)
+                        (str " IN (" (sql-val value#) ")")
+                        (str " <> " (sql-val value#)))))
 
-          (where< [col value]
-            (str (sql-val (fully-qualify col))
-                 (str " < " (sql-val value))))
+               (~'filter> [col# value#]
+                 (str (sql-val (~'fully-qualify col#))
+                      (str " > " (sql-val value#))))
 
-          (where-clause [[col predicate]]
-            (if (map? predicate)
-              (->> (for [[op value] predicate]
-                     (case op
-                       :> (where> col value)
-                       :< (where< col value)
-                       :not= (where-not= col value)))
-                    (interpose " AND ")
-                    (reduce str))
-              (where= col predicate)))]
+               (~'filter< [col# value#]
+                 (str (sql-val (~'fully-qualify col#))
+                      (str " < " (sql-val value#))))
 
-    (when where
-      (->> (map where-clause where)
-           (interpose " AND ")
-           (reduce str)
-           (str "WHERE ")))))
+               (~'filter-clause [[col# predicate#]]
+                 (if (map? predicate#)
+                   (->> (for [[op# value#] predicate#]
+                          (case op#
+                            :> (~'filter> col# value#)
+                            :< (~'filter< col# value#)
+                            :not= (~'filter-not= col# value#)))
+                        (interpose " AND ")
+                        (reduce str))
+                   (~'filter= col# predicate#)))]
+
+         (when ~clause
+           (->> (map ~'filter-clause ~clause)
+                (interpose " AND ")
+                (reduce str)
+                (str ~clause-name)))))))
+
+(make-filter
+ where
+ "Generates the WHERE part of a SQL statement from a query map."
+
+ (keyword (str (name table) "." (name col))))
 
 (defn insert
   "Generates an INSERT SQL statement from a query map."
