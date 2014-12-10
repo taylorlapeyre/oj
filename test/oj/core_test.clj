@@ -47,6 +47,13 @@
                   :group [:order_id]})
          "SELECT order_id, sum(price) FROM orders GROUP BY order_id")))
 
+(deftest select-statement-with-having
+  (is (= (sqlify {:table :orders
+                  :select [:order_id '(sum :price)]
+                  :group [:order_id]
+                  :having {'(sum :price) {:> 2}}})
+         "SELECT order_id, sum(price) FROM orders GROUP BY order_id HAVING sum(price) > 2")))
+
 (deftest insert-statement
   (is (= (sqlify {:table :users
                   :insert {:username "taylor" :password "password"}})
