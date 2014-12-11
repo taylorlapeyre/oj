@@ -1,39 +1,41 @@
 (ns oj.generators
   "Functions for generating SQL statements from a query map.")
 
-(declare sql-val)
+; Converting values to SQL
+; ==========================================
 
-(defn aggregate?
-  "Returns whether a given value is an SQL aggregate form."
+(defmulti sql-val
+  "Represents a value as it would appear in a SQL query."
+  class)
+
+(defmethod sql-val String
   [value]
-  (and (seq? value)
-       (symbol? (first value))))
+  (str "'" value "'"))
 
-(defn- sql-aggregate
-  "Transforms an SQL aggregate form into its string representation."
+(defmethod sql-val clojure.lang.Keyword
   [value]
+  (name value))
 
+(defmethod sql-val java.lang.Boolean
+  [value]
+  (if value 1 0))
+
+(defmethod sql-val clojure.lang.Sequential
+  [value]
+  (reduce str (interpose ", " (map sql-val value))))
+
+(defmethod sql-val clojure.lang.PersistentList
+  [value]
   (let [[[func] params] (split-at 1 value)]
     (str (name func) "(" (apply str (interpose ", " (map sql-val params))) ")")))
 
-(defn sql-val
-  "Takes a value and represents it as it would occur in an SQL query."
+(defmethod sql-val :default
   [value]
-  (cond (string? value)
-        (str "'" value "'")
+  value)
 
-        (aggregate? value)
-        (sql-aggregate value)
 
-        (keyword? value)
-        (name value)
-
-        (or (= true value) (= false value))
-        (if value 1 0)
-
-        (coll? value)
-        (reduce str (interpose ", " (map sql-val value)))
-        :else value))
+; Generating parts of SQL queries
+; ==========================================
 
 (defn select
   "Generates the SELECT part of a SQL statement from a query map."
@@ -100,25 +102,27 @@
             (if (map? predicate)
               (->> (for [[op value] predicate]
                      (case op
-                       :> (where> col value)
-                       :>= (where>= col value)
-                       :< (where< col value)
-                       :<= (where<= col value)
+                       :>    (where> col value)
+                       :>=   (where>= col value)
+                       :<    (where< col value)
+                       :<=   (where<= col value)
                        :not= (where-not= col value)))
                     (interpose " AND ")
-                    (reduce str))
+                    (apply str))
               (where= col predicate)))]
 
     (when where
-      (->> (map where-clause where)
-           (interpose " AND ")
-           (reduce str)
-           (str "WHERE ")))))
+      (let [has-empty-vector? #(and (vector? (second %)) (empty? (second %)))
+            empty-vectors-to-null #(if (has-empty-vector? %) [(first %) :NULL] %)]
+        (->> (map empty-vectors-to-null where)
+             (map where-clause)
+             (interpose " AND ")
+             (reduce str)
+             (str "WHERE "))))))
 
 (defn insert
   "Generates an INSERT SQL statement from a query map."
   [{:keys [table insert]}]
-
   (str
     "INSERT INTO "
     (sql-val table) " ("

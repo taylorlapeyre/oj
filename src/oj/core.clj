@@ -1,12 +1,18 @@
 (ns oj.core
   (:use oj.generators)
   (:require [clojure.java.jdbc :as j]
-            [oj.generators :as gen]
+            [oj.generators :as generators]
             [oj.validation :as validate]
             [oj.logging :as logging]
             [clojure.string :refer [trim split]]))
 
-(defn stateful-query?
+(defn aggregate?
+  "Returns whether a given value is an SQL aggregate form."
+  [value]
+  (and (seq? value)
+       (symbol? (first value))))
+
+(defn causes-side-effects?
   "Returns true if the query will have side effects."
   [query]
   (or (:insert query)
@@ -16,7 +22,9 @@
 (defn rename-aggregates
   "Given a tuple result, analyzes it for keys that represent the result of
   SQL aggregate functions. When found, converts it to a nested map structure:
-  {:sum(price) 500} => {:sum {:price 500}}"
+    {:sum(price) 500} => {:sum {:price 500}}
+
+  FIXME: This function can probably be refactored."
   [tuple]
   (let [aggregate-pair? #(re-matches #"[a-zA-Z]+\([a-zA-Z]+\)" (name (first %)))
         aggregate-pairs (filter aggregate-pair? tuple)
@@ -42,23 +50,27 @@
          (reduce merge)
          (merge (into {} non-aggregate-pairs)))))
  
+
+; Defining the order of operations for building SQL
+; =================================================
+
 (def sql-select-generators
-  [gen/select
-   gen/where
-   gen/group
-   gen/order
-   gen/limit])
+  [generators/select
+   generators/where
+   generators/group
+   generators/order
+   generators/limit])
 
 (def sql-insert-generators
-  [gen/insert])
+  [generators/insert])
 
 (def sql-update-generators
-  [gen/update
-   gen/where])
+  [generators/update
+   generators/where])
 
 (def sql-delete-generators
-  [gen/delete
-   gen/where])
+  [generators/delete
+   generators/where])
 
 (defn sqlify
   "Takes a query map and returns a valid SQL statement to be executed."
@@ -79,20 +91,21 @@
 (defn exec
   "Given a query map and a database config, generates and runs SQL for the query.
   Returns the resuling tuples in a humane format."
-  [{:keys [table select insert update delete join] :as query} db]
+  [{:keys [table select insert update delete] :as query} db]
   (logging/pretty-log (sqlify query))
   (let [tuples (cond insert (j/insert! db (:table query) (:insert query))
                      (or update delete) (j/execute! db [(sqlify query)])
                      :else (j/query db [(sqlify query)]))]
-    (cond (stateful-query? query) tuples
+    (cond
+        (causes-side-effects? query) tuples
 
-          (gen/aggregate? (:select query))
-          (second (ffirst tuples))
+        (aggregate? (:select query))
+        (second (ffirst tuples))
 
-          (and (= 1 (count select)) (gen/aggregate? (first select)))
-          (second (ffirst tuples))
+        (and (= 1 (count select)) (aggregate? (first select)))
+        (second (ffirst tuples))
 
-          (some gen/aggregate? select)
-          (map rename-aggregates tuples)
+        (some aggregate? select)
+        (map rename-aggregates tuples)
 
-          :else tuples)))
+        :else tuples)))

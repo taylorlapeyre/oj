@@ -1,4 +1,4 @@
-== OJ Spec (0.1.0 Draft)
+== OJ Spec (0.3.0 Draft)
 OJ is defined in terms of generators, modifiers, and query maps, each of which
 is described below.
 
@@ -11,8 +11,8 @@ Modifiers manipulate and modify query maps. They are implemented as functions
 that accept a query map, change it in some way, and return a new valid query map.
 
 == Query Map
-A query map is a Clojure map containing *at least two* of the following keys and
-corresponding values:
+A query map is a Clojure map containing the :table key and one or more of the
+following keys and corresponding values:
 
   :table
     (Required, Keyword)
@@ -21,71 +21,63 @@ corresponding values:
 ---
 
   :select
-    (Optional, Vector)
-    The collection of column names to be selected from :table. If no :select
-    is specified, the query will select all columns.
+  (Optional, Vector or List)
+    If a vector, then the collection of column names to be selected from :table.
 
-    If the column name is a list, it will be treated as an aggregate
-    function: the first member will be the function, all the rest the
-    parameters.
+    If a list is provided as a column name, it will be treated as an aggregate
+    function where the first element is the function and the rest are the parameters.
+
+    Alternatively, the entire :select clause can be an aggregate function defined
+    by the rules above. In this case, the query will return only the result of the
+    aggregate function as a single value.
+
+    If no :select is specified, the query will select all columns.
+
+    Example:
+      :select [:id :name]                 ; => SELECT id, name ...
+      :select [:published '(avg :price)]  ; => SELECT published, AVG(price) ...
+      :select '(sum :price)               ; => SELECT SUM(price) ...
 
   :insert
-    (Optional, IPersistentMap)
+    (Optional, Map)
     A Clojure map of column names corresponding to desired values to insert into
     the :table.
 
   :update
-    (Optional, IPersistentMap)
+    (Optional, Map)
     A Clojure map of column names corresponding to desired values to update from
     a particular record in :table.
 
   :delete
-    (Optional, Boolean)
-    If truthy, signifies that you wish to delete a particular record from :table.
+    (Optional, Boolean or Keyword)
+
+    If true, signifies that you wish to delete a particular record from :table.
     If the value of :delete is the keyword :all, the :where key is not required.
 
-The presence of each of these four keys may also require the presence of the
-following keys:
+The presence of any of these four keys may also require the presence of one or
+more of the following keys:
 
   :where
-    (IPersistentMap)
-    Required For: (:update)
-    Optional For: (:select, :delete)
+    (Optional: [:select, :delete, :update], Map)
     A Clojure map containing column names and the corresponding values with which
     to filter the table by. Values may be numbers, strings, vectors, or maps.
 
-    If the value of an item in :where is a map, it contain only the following keys:
+    If the value of an item in :where is a map, it signifies the condition to be placed
+    onto the item. Keys represent comparator functions and must be one of the following:
     [:< :<= :> :>= :not=]
 
-    {:table :users
-     :where {:age {:> 21 :< 18}}}
-    SELECT * FROM users WHERE age > 21 AND age < 18
+    Example:
+      :where {:age {:> 21 :< 18}} => SELECT ... WHERE age > 21 AND age < 18
 
   :group
-    (Vector)
-    Optional For: (:select)
+    (Optional: [:select], Vector)
     A vector of SQL column names to group the query by.
 
   :order
-    (Vector)
-    Optional For: (:select)
+    (Optional: [:select], Vector)
     A vector of two elements. The first is the column name to order by, the
     second is the direction with which to list the results (:desc or :asc).
 
   :limit
-    (Integer)
-    Optional For: (:select)
+    (Optional: [:select], Integer)
     The number of results which to return from :table.
-
-  :join
-    (IPersistentMap)
-    Optional For: (:select)
-    Keys are the names of tables that you wish to join, and correspond to another
-    map which relates a column of the join table with an identifying column on
-    the query map's table.
-
-    {:table :users
-     :join {:items {:user_id :id}}}
-    => SELECT id, email FROM users
-    => SELECT * FROM items WHERE items.user_id = 1
-    => SELECT * FROM items WHERE items.user_id = 2

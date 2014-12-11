@@ -1,0 +1,8 @@
+0.3.0
+=====
+- Modify :select to accept an aggregate function
+- Modify exec to return a single value in the above case
+- Change the structure of aggregate values in results
+- Completely remove the poorly implemented :join key
+- sql-val is now a multimethod
+- Add over 40 new tests

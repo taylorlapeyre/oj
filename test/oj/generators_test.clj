@@ -13,8 +13,9 @@
 
   (testing ":select with aggregate functions"
     (is (= (sqlify {:table :orders
-                    :select [:order_id '(avg :price)]})
-           "SELECT order_id, avg(price) FROM orders"))
+                    :select [:completed '(avg :price)]
+                    :group [:completed]})
+           "SELECT completed, avg(price) FROM orders GROUP BY completed"))
     (is (= (sqlify {:table :orders
                     :select '(sum :price)})
            "SELECT sum(price) FROM orders"))
@@ -42,30 +43,42 @@
   (testing ":where with 'than or equal to' comparators"
     (is (= (sqlify {:table :users
                     :where {:age {:>= 18 :<= 60}}})
-           "SELECT * FROM users WHERE users.age <= 60 AND users.age >= 18"))))
+           "SELECT * FROM users WHERE users.age <= 60 AND users.age >= 18")))
+
+  (testing ":where with the use of a vector of possible values"
+    (is (= (sqlify {:table :users
+                    :where {:id [1 2 3]}})
+           "SELECT * FROM users WHERE users.id IN (1, 2, 3)")))
+
+  (testing "a :where with an empty vector assume NULL."
+    (is (= (sqlify {:table :users
+                    :where {:id []}})
+           "SELECT * FROM users WHERE users.id = NULL"))))
 
 (deftest update-generator
-  (testing ":update with a vector of ")
-  (is (= (sqlify {:table :users
-                  :update {:username "different"}
-                  :where {:username "taylor"}})
-         "UPDATE users SET username = 'different' WHERE users.username = 'taylor'")))
+  (testing ":update acting upon a single value"
+    (is (= (sqlify {:table :users
+                    :update {:username "different"}
+                    :where {:username "taylor"}})
+           "UPDATE users SET username = 'different' WHERE users.username = 'taylor'")))
 
-(deftest delete-statement
-  (is (= (sqlify {:table :users
-                  :delete true
-                  :where {:username "taylor"}})
-         "DELETE FROM users WHERE users.username = 'taylor'")))
+  (testing ":update acting upon a multiple values"
+    (is (= (sqlify {:table :users
+                    :update {:username "different" :updated_at "now"}
+                    :where {:username "taylor"}})
+           "UPDATE users SET username = 'different', updated_at = 'now' WHERE users.username = 'taylor'"))))
 
-(deftest alternative-delete-statement
-  (is (= (sqlify {:table :users
-                  :delete :all})
-         "DELETE FROM users")))
+(deftest delete-generator
+  (testing ":delete with a boolean and a :where"
+    (is (= (sqlify {:table :users
+                    :delete true
+                    :where {:username "taylor"}})
+           "DELETE FROM users WHERE users.username = 'taylor'")))
 
-(deftest alternative-where-statement
-  (is (= (sqlify {:table :users
-                  :where {:id {:> 2 :< 20 :not= 21}}})
-         "SELECT * FROM users WHERE users.id <> 21 AND users.id > 2 AND users.id < 20")))
+  (testing ":delete with the :all keyword and no :where statement"
+    (is (= (sqlify {:table :users
+                    :delete :all})
+           "DELETE FROM users"))))
 
 (deftest group-generator
   (testing ":group with one column name"
@@ -80,7 +93,17 @@
                     :group [:id :email]})
            "SELECT id FROM orders GROUP BY id, email"))))
 
-(deftest everything-at-once
+(deftest limit-generator
+  (testing ":limit with an integer"
+    (is (= (sqlify {:table :orders :limit 1})
+           "SELECT * FROM orders LIMIT 1"))))
+
+(deftest order-generator
+  (testing ":order with a vector containing a col and order"
+    (is (= (sqlify {:table :orders :order [:price :asc]})
+           "SELECT * FROM orders ORDER BY price asc"))))
+
+(deftest stress-test
   (is (= (sqlify {:table :users
                   :select [:username :id '(avg :score)]
                   :where {:username "taylorlapeyre" :id 1}

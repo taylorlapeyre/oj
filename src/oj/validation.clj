@@ -49,14 +49,16 @@
               (problem "The keys to a :where must be keywords."))
             (let [valid-type? #(or (string? %) (number? %))]
               (for [value (vals where)]
-                (if (map? value)
-                  (do
-                    (when-not (every? valid-comparator? (keys value))
-                      (problem "Invalid comparator in :where. Valid keys are [:> :< :not=]"))
-                    (when-not (every? valid-type? (vals value))
-                      (problem "Every value in a comparator clause must be either a string or a number.")))
-                  (when-not (valid-type? value)
-                    (problem "Every value in a :where map must be either a string, number, or map.")))))
+                (cond (map? value)
+                      (do (when-not (every? valid-comparator? (keys value))
+                            (problem "Invalid comparator in :where. Valid keys are [:> :< :not=]"))
+                          (when-not (every? valid-type? (vals value))
+                            (problem "Every value in a comparator clause must be either a string or a number.")))
+                      (vector? value)
+                      (when-not (every? valid-type? value)
+                        "Every value in a range of values must be either a string or a number.")
+                      (not (valid-type? value))
+                      (problem "Every value in a :where map must be either a string, number, vector, or map."))))
             true)
 
           (validate-group []

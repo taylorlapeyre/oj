@@ -1,8 +1,7 @@
-(ns oj.logging)
-
-(defn highlight [sentence]
-  (str "\033[91m" sentence "\033[0m"))
+(ns oj.logging
+  "Functions for logging SQL queries to stdout."
+  (:require [clojure.tools.logging :as log]))
 
 (defn pretty-log [query]
   (when (System/getenv "PRINT_DB_LOGS")
-    (println (highlight query))))
+    (log/info query)))
