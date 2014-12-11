@@ -3,7 +3,7 @@
 
 (declare sql-val)
 
-(defn- aggregate?
+(defn aggregate?
   "Returns whether a given value is an SQL aggregate form."
   [value]
   (and (seq? value)

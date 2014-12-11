@@ -4,8 +4,44 @@
             [oj.generators :as gen]
             [oj.validation :as validate]
             [oj.logging :as logging]
-            [clojure.string :refer [trim]]))
+            [clojure.string :refer [trim split]]))
 
+(defn stateful-query?
+  "Returns true if the query will have side effects."
+  [query]
+  (or (:insert query)
+      (:update query)
+      (:delete query)))
+
+(defn rename-aggregates
+  "Given a tuple result, analyzes it for keys that represent the result of
+  SQL aggregate functions. When found, converts it to a nested map structure:
+  {:sum(price) 500} => {:sum {:price 500}}"
+  [tuple]
+  (let [aggregate-pair? #(re-matches #"[a-zA-Z]+\([a-zA-Z]+\)" (name (first %)))
+        aggregate-pairs (filter aggregate-pair? tuple)
+        non-aggregate-pairs (filter (complement aggregate-pair?) tuple)
+        aggregate-keys (keys aggregate-pairs)
+        aggregate-vals (vals aggregate-pairs)
+        format-ops  (comp keyword first #(clojure.string/split % #"\(") name)
+        format-cols (comp keyword
+                          #(apply str %)
+                          drop-last
+                          second
+                          #(clojure.string/split % #"\(")
+                          name)
+        ops  (map format-ops  aggregate-keys)
+        cols (map format-cols aggregate-keys)]
+
+    (->> (interleave ops cols)
+         (partition 2)
+         (interleave aggregate-vals)
+         (reverse)
+         (partition 2)
+         (map #(apply assoc-in (cons {} %)))
+         (reduce merge)
+         (merge (into {} non-aggregate-pairs)))))
+ 
 (def sql-select-generators
   [gen/select
    gen/where
@@ -41,30 +77,22 @@
          (trim))))
 
 (defn exec
-  "Given a query map and a database config, generates and runs SQL for the query
-  and for all join tables. Returns the resuling tuples."
-  [query db]
+  "Given a query map and a database config, generates and runs SQL for the query.
+  Returns the resuling tuples in a humane format."
+  [{:keys [table select insert update delete join] :as query} db]
   (logging/pretty-log (sqlify query))
+  (let [tuples (cond insert (j/insert! db (:table query) (:insert query))
+                     (or update delete) (j/execute! db [(sqlify query)])
+                     :else (j/query db [(sqlify query)]))]
+    (cond (stateful-query? query) tuples
 
-  (letfn [(associate-join [tuple join db]
-            (let [[join-name {:keys [table where select]}] join
-                  [[foreign-key key]] (vec where)
-                  key (if (keyword? key) (key tuple) key)
-                  compiled-subquery {:table table
-                                     :select select
-                                     :where {foreign-key key}}]
-              (assoc tuple join-name (exec compiled-subquery db))))]
+          (gen/aggregate? (:select query))
+          (second (ffirst tuples))
 
-    (let [tuples (cond (:insert query)
-                       (j/insert! db (:table query) (:insert query))
+          (and (= 1 (count select)) (gen/aggregate? (first select)))
+          (second (ffirst tuples))
 
-                       (or (:update query) (:delete query))
-                       (j/execute! db [(sqlify query)])
+          (some gen/aggregate? select)
+          (map rename-aggregates tuples)
 
-                       :else
-                       (j/query db [(sqlify query)]))]
-      (if-not (:join query)
-        tuples
-        (for [join (:join query)]
-          (for [tuple tuples]
-            (associate-join tuple join db)))))))
+          :else tuples)))

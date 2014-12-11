@@ -5,17 +5,27 @@
   (let [message (str "The query map had a problem: " message)]
     (throw (Exception. message))))
 
+(def valid-comparator?
+  #{:> :< :>= :<= :not=})
+
+(def valid-aggregate-function?
+  #{'count 'avg 'max 'min 'first 'last 'sum})
+
 (defn validate-query-map [{:keys [table select insert where group update delete join]}]
   "Analyzes a query map and throws an error when it finds malformed data."
   ; letfn is really ugly...
   (letfn [(validate-select []
-            (when-not (vector? select)
-              (problem ":select must be a vector."))
+            (when-not (or (seq? select) (vector? select))
+              (problem ":select must be a seq or a vector."))
             (when (empty? select)
               (problem ":select must not be empty when present."))
-            (let [valid-type? #(or (keyword? %) (coll? %))]
+            (let [valid-type? #(or (keyword? %) (symbol? %) (seq? %))]
               (when-not (every? valid-type? select)
-                (problem "The elements of :select must be keywords or lists.")))
+                (problem "The elements of :select must be keywords, symbols, or seqs.")))
+            (when-not (if (seq? select)
+                        (valid-aggregate-function? (first select))
+                        (every? valid-aggregate-function? (map first (filter seq? select))))
+              (problem "Invalid aggregate function. Valid functions are [count avg max min first last sum]."))
             true)
 
           (validate-insert []
@@ -37,8 +47,7 @@
               (problem ":where must not be empty when present."))
             (when-not (every? keyword? (keys where))
               (problem "The keys to a :where must be keywords."))
-            (let [valid-type? #(or (string? %) (number? %))
-                  valid-comparator? #(contains? '[= not= < >] %)]
+            (let [valid-type? #(or (string? %) (number? %))]
               (for [value (vals where)]
                 (if (map? value)
                   (do
@@ -77,22 +86,8 @@
               (problem ":delete must have a truthy value."))
             (when (and (not= delete :all) (nil? where))
               (problem ":delete requires the presence of a :where key when its value is not :all."))
-            true)
-
-          (validate-join []
-            (when-not (map? join)
-              (problem ":join must be a map."))
-            (when-not (every? keyword? (keys join))
-              (problem "The keys to a :join must be keywords."))
-            (when-not (every? map? (vals join))
-              (problem "The values in a :join map must be a map of foreign key pairs."))
-            (when-not (every? #(= (count %) 1) (vals join))
-              (problem "Foreign map pairs in a :join must have only one key/value."))
-            (for [foreign-key-map (vals join)]
-              (when-not (and (every? keyword? (vals foreign-key-map))
-                             (every? keyword? (keys foreign-key-map)))
-                (problem "Both keys and values to foreign key pairs in a :join must be keywords.")))
             true)]
+
     (when-not (keyword? table)
       (problem ":table is required."))
 
@@ -102,6 +97,5 @@
     (when group (validate-group))
     (when where (validate-where))
     (when delete (validate-delete))
-    (when join (validate-join))
 
     true))
