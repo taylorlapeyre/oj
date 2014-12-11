@@ -7,15 +7,17 @@
 A refreshing Clojure library for talking to your database, heavily influenced by [Ring][ring].
 
 #### Features
-- Gives you a [standard interface](https://github.com/taylorlapeyre/oj/blob/master/doc/SPEC) for generating SQL
+- Gives you a [standard interface](https://github.com/taylorlapeyre/oj/blob/master/doc/SPEC) for running and generating SQL
+- Focuses on the most common and useful features of SQL
 - Enforces type checking and validation for queries
 - Sensible defaults
 - Concise and powerful API
 - Encourages reusable components
 
 #### Anti-features
+- Doesn't try to implement the entiretly of SQL
 - Doesn't require you to write SQL
-- Doesn't create its own domain-specific language (there are no macros)
+- Doesn't create its own domain-specific language
 - Doesn't surprise you
 
 
@@ -26,11 +28,11 @@ The [SPEC][spec] file provides a complete description of the OJ interface.
 Add this to your Leiningen :dependencies:
 
 ```
-[oj "0.2.4"]
+[oj "0.3.0"]
 ```
 
 You'll also need a database driver (thanks to [yesql][yesql] for providing
-this handy dandy table):
+this handy table):
 
 |Database|`:dependencies` Entry|
 |---|---|
@@ -118,19 +120,14 @@ Of course, you can also perform all of the standard CRUD operations that you'd e
 OJ gives you a lot of flexibility. For instance, you could write some custom modifier functions and then execute them when you like. This allows you to combine them.
   ``` clojure
 (defn find-by-username
-  ([query username]
-    (-> query
-        (db/where {:username username})))
-  ([username]
-    (-> (db/query :users)
-        (db/where {:username username}))))
+  [query username]
+  (-> query
+      (db/where {:username username})))
 
-; Joins are also easily done.
-(-> (find-by-username "taylor")
-    (db/join :items)
+(-> (query :users)
+    (find-by-username "taylor")
     (oj/exec db-config)
     (first))
-; => {:username "taylor" ... :items ({:id 1 :name "A thing"})}
 ```
 
 ## Printing SQL Queries
@@ -146,7 +143,7 @@ If you'd like SQL queries logged to your console when executed, you can enable i
 
 ## TODO
 
-- Aggregate functions
+- Joins
 
 
 ## License
