@@ -4,8 +4,6 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/java.jdbc "0.3.6"]
-                 [inflections "0.9.10"]
-                 [environ "0.5.0"]]
+                 [org.clojure/java.jdbc "0.3.6"]]
 
   :profiles {:dev {:dependencies [[com.h2database/h2 "1.4.182"]]}})
