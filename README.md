@@ -110,12 +110,33 @@ Of course, you can also perform all of the standard CRUD operations that you'd e
         (db/update user-data)
         (oj/exec db-config))))
 
-  (defn delete [id]
-    (-> (db/query :users)
-        (db/where {:id id})
-        (db/delete)
-        (oj/exec db-config)))
-  ```
+(defn delete [id]
+  (-> (db/query :users)
+      (db/where {:id id})
+      (db/delete)
+      (oj/exec db-config)))
+```
+
+How about using SQL's aggregate functions? OJ allows you to use those as well, using a Clojure-like syntax.
+
+For example, to get the average price of all items:
+
+```clojure
+(-> (db/query :items)
+    (select '(avg :price))
+    (oj/exec db-config))
+; => 46.76
+```
+
+For more advanced uses, OJ will provide the data in a useful format.
+
+```clojure
+(-> (db/query :items)
+    (group :published)
+    (select [:published '(avg :price)])
+    (oj/exec db-config))
+; ({:published 1 :avg {:price 64.35}}, {:published 0 :avg {:price 10.35}})
+```
 
 OJ gives you a lot of flexibility. For instance, you could write some custom modifier functions and then execute them when you like. This allows you to combine them.
   ``` clojure
