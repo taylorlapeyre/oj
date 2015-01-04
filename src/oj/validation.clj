@@ -25,8 +25,8 @@
             (when-not (if (seq? select)
                         (valid-aggregate-function? (first select))
                         (every? valid-aggregate-function? (map first (filter seq? select))))
-              (problem "Invalid aggregate function. Valid functions are [count avg max min first last sum]."))
-            true)
+              (problem "Invalid aggregate function. Valid functions are [count avg max min first last sum].")))
+
 
           (validate-insert []
             (when-not (map? insert)
@@ -37,8 +37,7 @@
               (problem "The keys to an :insert must be keywords."))
             (let [valid-type? #(or (string? %) (number? %) (= true %) (= false %))]
               (when-not (every? valid-type? (vals insert))
-                (problem "Every value to an :insert map must be either a string, number, or boolean.")))
-            true)
+                (problem "Every value to an :insert map must be either a string, number, or boolean."))))
 
           (validate-where []
             (when-not (map? where)
@@ -58,8 +57,7 @@
                       (when-not (every? valid-type? value)
                         "Every value in a range of values must be either a string or a number.")
                       (not (valid-type? value))
-                      (problem "Every value in a :where map must be either a string, number, vector, or map."))))
-            true)
+                      (problem "Every value in a :where map must be either a string, number, vector, or map.")))))
 
           (validate-group []
             (when-not (vector? group)
@@ -80,15 +78,13 @@
               (when-not (every? valid-type? (vals update))
                 (problem "Every value to an :update map must be either a string, number, or boolean.")))
             (when-not where
-              (problem ":update requires the presence of a :where key."))
-            true)
+              (problem ":update requires the presence of a :where key.")))
 
           (validate-delete []
             (when-not delete
               (problem ":delete must have a truthy value."))
             (when (and (not= delete :all) (nil? where))
-              (problem ":delete requires the presence of a :where key when its value is not :all."))
-            true)]
+              (problem ":delete requires the presence of a :where key when its value is not :all.")))]
 
     (when-not (keyword? table)
       (problem ":table is required."))
