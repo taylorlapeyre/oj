@@ -65,7 +65,7 @@ Queries can be executed by passing a query map and a database config into `oj/ex
 
 **Modifiers** are functions that transform a query map into another query map. This allows us to chain them together. Some basic modifiers are provided by default at `oj.modifiers`.
 ``` clojure
-(require [oj.core :as oj])
+(require [oj.core :as oj]
          [oj.modifiers :as db])
 
 (defn find-by-username [username]
